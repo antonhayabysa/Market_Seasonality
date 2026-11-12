@@ -15,7 +15,7 @@ const INSTRUMENTS = [
   { id: 'US500', yahoo: '^GSPC' },
   { id: 'US30', yahoo: '^DJI' },
   { id: 'US2000', yahoo: '^RUT' },
-  { id: 'GER30', yahoo: '^GDAXI' },
+  { id: 'GER40', yahoo: '^GDAXI' },
   { id: 'FRA40', yahoo: '^FCHI' },
   { id: 'EU50', yahoo: '^STOXX50E' },
   { id: 'UK100', yahoo: '^FTSE' },
