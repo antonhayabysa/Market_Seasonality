@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ru" id="htmlLang">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сезонность рынков | Market Seasonality</title>
+  <meta name="description" content="Сезонность рынков за 20 лет: какие металлы, нефть, индексы и валюты чаще растут и падают в каждом месяце, насколько надёжен перевес и какой средний рост и падение. Market seasonality for gold, oil, indices and FX.">
+  <meta property="og:title" content="Сезонность рынков | Market Seasonality">
+  <meta property="og:description" content="20-year monthly seasonality for gold, silver, oil, indices and FX pairs.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#0f0f0f">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230f0f0f'/><rect x='5' y='16' width='6' height='11' rx='1.5' fill='%234ade80'/><rect x='13' y='10' width='6' height='17' rx='1.5' fill='%23f87171'/><rect x='21' y='5' width='6' height='22' rx='1.5' fill='%234ade80'/></svg>">
+  <meta name="google-site-verification" content="-WAUrX9r1XT0mG0Bn8Fxl8oJ5Wo5XsMf0Rk067ke1Nw" />
+  <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0f0f0f;--bg2:#1a1a1a;--bg3:#2a2a2a;--border:#333;--border-active:#666;--text:#fff;--text-muted:#8a8a8a;--text-dim:#555;--green:#4ade80;--red:#f87171;--yellow:#fbbf24;--accent:#3b82f6;--heat-up:74,222,128;--heat-dn:248,113,113;--neutral:#232323;color-scheme:dark}
+    body.light{--bg:#f5f5f5;--bg2:#fff;--bg3:#e8e8e8;--border:#ddd;--border-active:#999;--text:#111;--text-muted:#555;--text-dim:#999;--green:#16a34a;--red:#dc2626;--yellow:#b45309;--heat-up:22,163,74;--heat-dn:220,38,38;--neutral:#f0f0f0;color-scheme:light}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px 16px 40px;transition:background .2s,color .2s;-webkit-text-size-adjust:100%}
+    .wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+    button{font:inherit;color:inherit}
+    button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    h1{font-size:22px;font-weight:650;letter-spacing:-.01em}
+    .tools{display:flex;gap:6px;align-items:center}
+    .lang-btn,.theme-btn{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text-muted);font-size:13px;cursor:pointer;transition:all .15s}
+    .lang-btn.active{background:var(--bg3);border-color:var(--border-active);color:var(--text)}
+    .theme-btn{font-size:16px;padding:5px 12px}
+    .lang-btn:hover,.theme-btn:hover{border-color:var(--border-active);color:var(--text)}
+    .meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--text-muted);font-size:12px;margin-top:-12px}
+    .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;padding:3px 10px;background:var(--bg2)}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+    .dot.warn{background:var(--yellow)}
+    .months{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;position:sticky;top:0;z-index:20;background:var(--bg);padding:8px 0;margin:-8px 0;scrollbar-width:none}
+    .months::-webkit-scrollbar{display:none}
+    .mob-only{display:none}
+    .m-btn{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 2px;color:var(--text-muted);font-size:13px;cursor:pointer;text-align:center;position:relative;transition:all .15s;user-select:none}
+    .m-btn:hover{border-color:var(--border-active);color:var(--text)}
+    .m-btn.active{background:var(--bg3);border-color:var(--border-active);color:var(--text);font-weight:600}
+    .m-btn.now::after{content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+    .now-tag{font-size:10px;color:var(--accent);display:block;line-height:1.1;margin-top:1px}
+    .lede{font-size:17px;line-height:1.45;max-width:72ch}
+    .lede b{font-weight:600}
+    .lede .g{color:var(--green)}
+    .lede .r{color:var(--red)}
+    .levels{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--text-muted);font-size:12px;align-items:center;margin-top:-10px}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+    .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;min-width:0}
+    .card h2,.sec h2{font-size:15px;font-weight:600}
+    .hint{color:var(--text-muted);font-size:12px;line-height:1.5;margin-top:4px;max-width:90ch}
+    .list{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:9px}
+    .li{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;font-variant-numeric:tabular-nums}
+    .li .s{font-weight:600}
+    .li .n{display:block;color:var(--text-muted);font-size:11px;font-weight:400}
+    .li .r{text-align:right;white-space:nowrap}
+    .li .r .v{font-weight:600}
+    .li .r .u{display:block;color:var(--text-muted);font-size:11px}
+    .up{color:var(--green)} .dn{color:var(--red)} .muted{color:var(--text-muted)}
+    .empty{color:var(--text-muted);font-size:13px}
+    .lv{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.02em;padding:1px 6px;border-radius:999px;border:1px solid currentColor;vertical-align:1px;margin-left:6px;white-space:nowrap}
+    .lv.l3{opacity:1} .lv.l2{opacity:.8} .lv.l1{opacity:.6}
+    .sec{display:flex;flex-direction:column;gap:10px}
+    .sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+    .filters{display:flex;flex-wrap:wrap;gap:6px}
+    .chip{background:var(--bg2);border:1px solid var(--border);border-radius:999px;padding:5px 11px;color:var(--text-muted);font-size:12px;cursor:pointer;transition:all .15s}
+    .chip:hover{color:var(--text);border-color:var(--border-active)}
+    .chip.active{background:var(--bg3);color:var(--text);border-color:var(--border-active)}
+    .scroll{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--bg2)}
+    table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+    .cmp th,.cmp td,.plan th,.plan td{padding:9px 12px;border-bottom:1px solid var(--border);text-align:left;font-size:13px;vertical-align:middle}
+    .cmp th,.plan th{color:var(--text-muted);font-weight:500;font-size:12px;white-space:nowrap;background:var(--bg2)}
+    .cmp tr:last-child td,.plan tr:last-child td{border-bottom:0}
+    .cmp td.num,.cmp th.num{text-align:right;white-space:nowrap}
+    .cmp td.nw{white-space:nowrap}
+    .cmp .inst{white-space:nowrap}
+    .cmp .inst b{font-weight:600}
+    .cmp .inst span{display:block;font-size:11px;color:var(--text-muted)}
+    .sub{display:block;font-size:11px;color:var(--text-muted)}
+    .bar{display:inline-block;width:52px;height:6px;border-radius:3px;background:var(--bg3);vertical-align:middle;margin-left:8px;overflow:hidden}
+    .bar i{display:block;height:100%;border-radius:3px}
+    .bias{display:inline-flex;align-items:center;gap:4px;font-weight:600;white-space:nowrap}
+    .match{font-size:11px;color:var(--text-muted);margin-left:6px}
+    .warn-txt{color:var(--yellow);font-size:11px;display:block}
+    .seg{display:inline-flex;gap:4px}
+    .sg{min-width:56px;border-radius:6px;padding:4px 6px;background:var(--neutral);text-align:center;line-height:1.25}
+    .sg .sl{display:block;font-size:10px;color:var(--text-muted)}
+    .sg .sv{display:block;font-size:12px;font-weight:600;color:var(--text-muted)}
+    .sg .sa{display:block;font-size:10px;color:var(--text-muted)}
+    .sg.on .sv{color:var(--text)}
+    .tip .tseg{display:flex;gap:4px;margin-top:4px}
+    .tip .sg{min-width:0;flex:1;padding:3px 4px}
+    .plan tr.pr{cursor:pointer}
+    .plan tr.pr:hover td,.plan tr.pr.sel td{background:var(--bg3)}
+    .plan td.mo{white-space:nowrap;font-weight:600}
+    .plan td.mo span{display:block;font-weight:400;color:var(--accent);font-size:11px}
+    .tag{display:inline-block;margin:2px 6px 2px 0;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid var(--border);white-space:nowrap}
+    .tag.l{color:var(--green)} .tag.s{color:var(--red)}
+    .tag.l.t3{background:rgba(var(--heat-up),.16);border-color:rgba(var(--heat-up),.5);font-weight:600}
+    .tag.s.t3{background:rgba(var(--heat-dn),.16);border-color:rgba(var(--heat-dn),.5);font-weight:600}
+    .tag.t1{opacity:.7}
+    .heat{border-collapse:separate;border-spacing:3px;font-size:12px}
+    .heat th{color:var(--text-muted);font-weight:500;padding:6px 4px;text-align:center;white-space:nowrap}
+    .heat thead th.mh{cursor:pointer;border-radius:6px}
+    .heat thead th.mh:hover{color:var(--text);background:var(--bg3)}
+    .heat thead th.mh.sel{color:var(--text);background:var(--bg3)}
+    .heat thead th.mh.now span{display:block;font-size:9px;color:var(--accent)}
+    .heat th.row{text-align:left;position:sticky;left:0;background:var(--bg2);z-index:1;color:var(--text);min-width:118px}
+    .heat th.row span{display:block;color:var(--text-muted);font-size:10px;font-weight:400}
+    .heat tr.grp th{text-align:left;color:var(--text-muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding-top:12px}
+    .heat tr.grp .gl{position:sticky;left:6px}
+    .heat td{min-width:56px;text-align:center;border-radius:6px;padding:5px 3px;cursor:pointer;transition:transform .1s;background:var(--neutral);position:relative}
+    .heat td:hover{transform:scale(1.05)}
+    .heat td .a{display:block;font-weight:500}
+    .heat td .w{display:block;font-size:10px;opacity:.8}
+    .heat td.nil .a,.heat td.nil .w{color:var(--text-muted)}
+    .heat td.cf::after{content:"!";position:absolute;top:1px;right:4px;font-size:9px;font-weight:700;color:var(--yellow)}
+    .heat td.sel{box-shadow:inset 0 0 0 1.5px var(--text)}
+    .heat-box{position:relative}
+    .tip{position:absolute;z-index:5;pointer-events:none;background:var(--bg2);border:1px solid var(--border-active);border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.55;min-width:210px;max-width:260px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+    .tip b{display:block;margin-bottom:2px}
+    .tip hr{border:0;border-top:1px solid var(--border);margin:5px 0}
+    .legend{display:flex;flex-wrap:wrap;gap:8px 16px;color:var(--text-muted);font-size:12px;align-items:center}
+    .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+    details{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px}
+    summary{cursor:pointer;font-weight:600;font-size:14px}
+    details ul{margin:10px 0 2px 18px;display:flex;flex-direction:column;gap:6px;color:var(--text-muted);font-size:13px;line-height:1.55;max-width:84ch}
+    .foot{color:var(--text-dim);font-size:11px;line-height:1.5}
+    .skeleton{color:var(--text-muted);font-size:13px;padding:16px}
+    .cmp .bar{display:none}
+    .cmp th,.cmp td{padding:9px 9px}
+    @media (max-width:1090px){
+      .mob-only{display:block}
+      .cmp thead{display:none}
+      .cmp,.cmp tbody{display:block}
+      .cmp tr{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:12px 14px;border-bottom:1px solid var(--border)}
+      .cmp tr:last-child{border-bottom:0}
+      .cmp td{display:block;padding:0;border:0!important;text-align:left!important;white-space:normal}
+      .cmp td.nw{white-space:normal}
+      .cmp td.inst{grid-column:1}
+      .cmp td.bcell{grid-column:2;text-align:right!important;align-self:center}
+      .cmp td.ycell,.cmp td.pcell{grid-column:1/-1}
+      .seg{display:flex}
+      .sg{flex:1}
+      .cmp td.empty{grid-column:1/-1}
+      .cmp .match{margin-left:6px}
+      .cmp td[data-label]::before,.plan td[data-label]::before{content:attr(data-label);display:block;font-size:11px;color:var(--text-muted);margin-bottom:3px;font-weight:400}
+      .cmp .bias{display:block}
+      .cmp .lv{margin-left:0;margin-top:4px}
+    }
+    @media (max-width:720px){
+      body{padding:14px 12px 32px}
+      .wrap{gap:20px}
+      .months{display:flex;overflow-x:auto;gap:6px}
+      .m-btn{flex:0 0 auto;min-width:58px;padding:8px 6px}
+      .lede{font-size:15px}
+      h1{font-size:19px}
+      .bar{display:none}
+      .cards{grid-template-columns:1fr}
+      .plan thead{display:none}
+      .plan,.plan tbody{display:block}
+      .plan tr{display:block;padding:12px 14px;border-bottom:1px solid var(--border)}
+      .plan tr:last-child{border-bottom:0}
+      .plan td{display:block;padding:0;border:0!important}
+      .plan td.mo{margin-bottom:8px}
+      .plan td.mo span{display:inline;margin-left:8px}
+      .plan td + td{margin-top:6px}
+      .plan tr.pr.sel,.plan tr.pr:hover{background:var(--bg3)}
+      .plan tr.pr td{background:transparent!important}
+      .tip{max-width:230px;min-width:190px}
+    }
+    @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1 id="t-title">Сезонность рынков</h1>
+    <div class="tools">
+      <button class="lang-btn" id="lang-ru" type="button" onclick="setLang('ru')">RU</button>
+      <button class="lang-btn" id="lang-ua" type="button" onclick="setLang('ua')">UA</button>
+      <button class="lang-btn" id="lang-en" type="button" onclick="setLang('en')">EN</button>
+      <button class="theme-btn" id="theme-btn" type="button" onclick="toggleTheme()" aria-label="Theme">☀︎</button>
+    </div>
+  </div>
+  <div class="meta" id="meta"></div>
+
+  <nav class="months" id="months" aria-label="Month"></nav>
+
+  <p class="lede" id="lede"></p>
+  <div class="levels" id="levels"></div>
+
+  <section class="cards">
+    <div class="card"><h2 id="t-longs"></h2><p class="hint" id="t-longs-h"></p><ol class="list" id="longs"></ol></div>
+    <div class="card"><h2 id="t-shorts"></h2><p class="hint" id="t-shorts-h"></p><ol class="list" id="shorts"></ol></div>
+    <div class="card"><h2 id="t-active"></h2><p class="hint" id="t-active-h"></p><ol class="list" id="active"></ol></div>
+  </section>
+
+  <section class="sec" id="cmp-sec">
+    <div class="sec-head">
+      <div><h2 id="t-cmp"></h2><p class="hint" id="t-cmp-h"></p></div>
+      <div class="filters" id="cmp-mode"></div>
+    </div>
+    <div class="filters" id="groups"></div>
+    <div class="scroll"><table class="cmp" id="cmp"></table></div>
+  </section>
+
+  <section class="sec" id="plan-sec">
+    <div><h2 id="t-plan"></h2><p class="hint" id="t-plan-h"></p></div>
+    <div class="scroll"><table class="plan" id="plan"></table></div>
+  </section>
+
+  <section class="sec" id="heat-sec">
+    <div><h2 id="t-heat"></h2><p class="hint" id="t-heat-h"></p></div>
+    <div class="legend" id="legend"></div>
+    <p class="hint mob-only" id="t-swipe"></p>
+    <div class="scroll heat-box" id="heat-box"><div class="skeleton">…</div></div>
+  </section>
+
+  <details id="method"><summary id="t-method"></summary><ul id="method-list"></ul></details>
+  <p class="foot" id="t-foot"></p>
+</div>
+
+<script>
+/* ── INSTRUMENTS ── */
+const INST = [
+  ['XAUUSD','metals',{ru:'Золото',ua:'Золото',en:'Gold'}],
+  ['XAGUSD','metals',{ru:'Серебро',ua:'Срібло',en:'Silver'}],
+  ['XPTUSD','metals',{ru:'Платина',ua:'Платина',en:'Platinum'}],
+  ['USOIL','oil',{ru:'Нефть WTI (USOUSD)',ua:'Нафта WTI (USOUSD)',en:'WTI crude (USOUSD)'}],
+  ['UKOIL','oil',{ru:'Нефть Brent (UKOUSD)',ua:'Нафта Brent (UKOUSD)',en:'Brent crude (UKOUSD)'}],
+  ['NDX100','indices',{ru:'Nasdaq 100',ua:'Nasdaq 100',en:'Nasdaq 100'}],
+  ['US500','indices',{ru:'S&P 500',ua:'S&P 500',en:'S&P 500'}],
+  ['US30','indices',{ru:'Dow Jones',ua:'Dow Jones',en:'Dow Jones'}],
+  ['US2000','indices',{ru:'Russell 2000',ua:'Russell 2000',en:'Russell 2000'}],
+  ['GER30','indices',{ru:'DAX',ua:'DAX',en:'DAX'}],
+  ['FRA40','indices',{ru:'CAC 40',ua:'CAC 40',en:'CAC 40'}],
+  ['EU50','indices',{ru:'Euro Stoxx 50',ua:'Euro Stoxx 50',en:'Euro Stoxx 50'}],
+  ['UK100','indices',{ru:'FTSE 100',ua:'FTSE 100',en:'FTSE 100'}],
+  ['JP225','indices',{ru:'Nikkei 225',ua:'Nikkei 225',en:'Nikkei 225'}],
+  ['HK50','indices',{ru:'Hang Seng',ua:'Hang Seng',en:'Hang Seng'}],
+  ['AUS200','indices',{ru:'ASX 200',ua:'ASX 200',en:'ASX 200'}],
+  ['DXY','fx',{ru:'Индекс доллара',ua:'Індекс долара',en:'US Dollar Index'}],
+  ['EURUSD','fx',null],['GBPUSD','fx',null],['USDJPY','fx',null],['USDCHF','fx',null],['USDCAD','fx',null],['AUDUSD','fx',null],['NZDUSD','fx',null],
+  ['EURJPY','crosses',null],['GBPJPY','crosses',null],['AUDJPY','crosses',null],['CADJPY','crosses',null],['EURGBP','crosses',null]
+].map(([id,group,name],order)=>({id,group,name,order}));
+
+/* ── LANG DATA ── */
+const L = {
+  ru:{
+    title:'Сезонность рынков',
+    mShort:['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
+    mFull:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+    mIn:['январе','феврале','марте','апреле','мае','июне','июле','августе','сентябре','октябре','ноябре','декабре'],
+    now:'сейчас',
+    stats:(a,b)=>`Статистика ${a}–${b}`, updated:d=>`обновлено ${d}`,
+    live:'данные Yahoo Finance, обновляются автоматически', fallback:'резервная копия данных', failed:n=>`${n} инстр. из резервной копии`,
+    lede:(n)=>[`В `,`за ${n} лет чаще всего рос `,`, а чаще всего падал `,`.`],
+    ledeNoDn:(n)=>[`В `,`за ${n} лет чаще всего рос `,`, а устойчиво падающих инструментов не было.`],
+    ledeNoUp:(n)=>[`В `,`за ${n} лет устойчиво растущих инструментов не было, а чаще всего падал `,`.`],
+    ledeNone:(n)=>[`В `,`за ${n} лет не было ни устойчиво растущих, ни устойчиво падающих инструментов.`],
+    none:'ни один инструмент',
+    ofN:(c,n)=>`${c} из ${n} лет`, rose:(c,n)=>`рос ${c} из ${n} лет`, fell:(c,n)=>`падал ${c} из ${n} лет`,
+    lvl:['нет перевеса','низкая','средняя','высокая'],
+    levelsLine:'Историческая повторяемость:', lvDesc:['высокая: 16+ лет из 20','средняя: 14–15 из 20','низкая: 13 из 20, бывает и случайно'],
+    longs:'Чаще росли', longsH:'Месяц закрылся в плюсе 13 лет из 20 и чаще, и средний ход с медианой тоже в плюсе.',
+    shorts:'Чаще падали', shortsH:'Месяц закрылся в минусе 13 лет из 20 и чаще, и средний ход с медианой тоже в минусе.',
+    active:'Больше всего движения', activeH:'Типичный ход: средний размер движения за месяц от закрытия до закрытия, без учёта направления (не High–Low). ×1.3 значит в этом месяце инструмент ходит на 30% больше, чем в свой обычный месяц.',
+    usual:'обычно',
+    noLongs:'В этом месяце нет инструментов с устойчивым ростом.', noShorts:'В этом месяце нет инструментов с устойчивым падением.',
+    cmp:m=>`${m}: перевес, история и последние два года`, cmpH:'Перевес показывает, что чаще было в прошлом, а не прогноз. Средний рост и среднее падение показывают, насколько большие месяцы в плюс и в минус: перевес по годам мало стоит, если падения в разы больше ростов. «Внутри месяца» показывает, как обычно шли 1–10, 11–20 и 21–31 число: подсвечены части с повторяемостью 14+ из 20.',
+    onlyEdge:'С перевесом', all:'Все',
+    groups:{all:'Все',metals:'Металлы',oil:'Нефть',indices:'Индексы',fx:'Валюты',crosses:'Кроссы'},
+    colParts:'Внутри месяца', partLbl:['1–10','11–20','21–31'],
+    colInst:'Инструмент', colBias:'Исторический перевес', colYears:'Сколько лет', colAvg:'Средний · медиана', colWL:'Ср. рост · ср. падение',
+    biasUp:'чаще рост', biasDn:'чаще падение', biasNone:'нет перевеса',
+    conflict:'средний и большинство лет спорят',
+    inProgress:'идёт', ahead:'впереди', noData:'нет данных', hit:'совпало', miss:'против',
+    noEdgeRows:'В этом месяце нет инструментов с перевесом в выбранной группе.',
+    plan:'План на 12 месяцев вперёд', planH:'Что исторически чаще росло и падало в каждом из ближайших месяцев. ↑16/20 значит рос 16 лет из 20. Жирные: высокая повторяемость. Нажми на строку, чтобы открыть месяц.',
+    colMonth:'Месяц', colL:'Чаще росли', colS:'Чаще падали', noneSteady:'нет устойчивых', curMonth:'текущий месяц',
+    heat:'Все инструменты по месяцам', heatH:'Сверху средний ход за месяц в %, снизу сколько лет из 20 был рост (↑16/20) или падение (↓14/20). Наведи на клетку, чтобы увидеть медиану и средний рост и падение. Нажми на месяц в шапке или на клетку, чтобы выбрать месяц.',
+    swipe:'Таблицу можно листать вбок →. Нажми на клетку, чтобы увидеть подробности.',
+    lgUp:'чаще рост', lgDn:'чаще падение', lgBright:'чем ярче, тем чаще повторялось', lgFlat:'серая: перевеса нет или повторяемость низкая', lgCf:'! средний ход и большинство лет в разные стороны',
+    tAvg:'Средний ход', tMed:'Медиана', tWin:'Средний рост', tLoss:'Среднее падение', tAbs:'Типичный ход',
+    tCf:'Средний ход вытянули несколько сильных лет, большинство лет в другую сторону. Перевеса нет.',
+    loading:'Загружаю данные…', loadErr:'Не удалось загрузить данные. Обнови страницу.',
+    method:'Как считалось и как пользоваться',
+    methodList:(a,b)=>[
+      `Период: последние 20 полных лет, сейчас ${a}–${b}. Каждый январь период сдвигается автоматически.`,
+      'Ход месяца: от закрытия прошлого месяца до закрытия этого. Для каждого месяца считаются средний ход, медиана (серединное значение, на неё не влияют единичные выбросы), сколько лет был рост, средний рост в плюсовые годы и среднее падение в минусовые.',
+      'Перевес есть, только если всё указывает в одну сторону: 13+ лет из 20 в одну сторону, и средний ход, и медиана в ту же сторону. Если средний ход в плюсе, а большинство лет в минусе (пара огромных лет вытянула среднее), перевеса нет, клетка серая с «!».',
+      'Историческая повторяемость: высокая 16+ лет из 20, средняя 14–15, низкая 13. Это частота в прошлом, а не вероятность: 16 из 20 не значит 80% шанс роста в этом году. Низкая повторяемость часто случайна (инструментов и месяцев сотни, и 13 из 20 само по себе выпадает примерно в 13% клеток), поэтому такие клетки не подсвечиваются цветом.',
+      'Внутри месяца: каждый месяц делится на три части: с 1 по 10 число (от закрытия прошлого месяца), с 11 по 20 и с 21 до закрытия месяца. Для каждой части считается то же: сколько лет был рост, средний ход и медиана. Чем короче отрезок, тем больше шума, поэтому цветом выделяются только части с повторяемостью 14+ из 20.',
+      'Смотри на средний рост и среднее падение: «рос 16 из 20 лет» плохо, если средний рост +2%, а среднее падение −5%.',
+      'Данные: месячные закрытия Yahoo Finance. Металлы и нефть это ближайшие фьючерсы (GC, SI, PL, CL, BZ), при смене контракта отдельные месяцы могут сдвигаться на 1–2% относительно CFD. Индексы кассовые, валюты спот. Сервер обновляет данные раз в 12 часов; если источник недоступен, берётся резервная копия.',
+      'Сезонность это фильтр направления на месяц, а не сигнал на вход и не прогноз. Вход только по сетапу. Сильные новости (война, ФРС, кризис) легко перекрывают сезонность.'],
+    foot:'Не является инвестиционной рекомендацией. Прошлые результаты не гарантируют будущих.'
+  },
+  ua:{
+    title:'Сезонність ринків',
+    mShort:['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'],
+    mFull:['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'],
+    mIn:['січні','лютому','березні','квітні','травні','червні','липні','серпні','вересні','жовтні','листопаді','грудні'],
+    now:'зараз',
+    stats:(a,b)=>`Статистика ${a}–${b}`, updated:d=>`оновлено ${d}`,
+    live:'дані Yahoo Finance, оновлюються автоматично', fallback:'резервна копія даних', failed:n=>`${n} інстр. з резервної копії`,
+    lede:(n)=>[`У `,`за ${n} років найчастіше зростав `,`, а найчастіше падав `,`.`],
+    ledeNoDn:(n)=>[`У `,`за ${n} років найчастіше зростав `,`, а стійко спадних інструментів не було.`],
+    ledeNoUp:(n)=>[`У `,`за ${n} років стійко зростаючих інструментів не було, а найчастіше падав `,`.`],
+    ledeNone:(n)=>[`У `,`за ${n} років не було ні стійко зростаючих, ні стійко спадних інструментів.`],
+    none:'жоден інструмент',
+    ofN:(c,n)=>`${c} з ${n} років`, rose:(c,n)=>`зростав ${c} з ${n} років`, fell:(c,n)=>`падав ${c} з ${n} років`,
+    lvl:['немає переваги','низька','середня','висока'],
+    levelsLine:'Історична повторюваність:', lvDesc:['висока: 16+ років із 20','середня: 14–15 із 20','низька: 13 із 20, буває й випадково'],
+    longs:'Частіше зростали', longsH:'Місяць закрився в плюсі 13 років із 20 і частіше, і середній хід з медіаною теж у плюсі.',
+    shorts:'Частіше падали', shortsH:'Місяць закрився в мінусі 13 років із 20 і частіше, і середній хід з медіаною теж у мінусі.',
+    active:'Найбільше руху', activeH:'Типовий хід: середній розмір руху за місяць від закриття до закриття, без урахування напрямку (не High–Low). ×1.3 означає, що в цьому місяці інструмент ходить на 30% більше, ніж у свій звичайний місяць.',
+    usual:'зазвичай',
+    noLongs:'У цьому місяці немає інструментів зі стійким зростанням.', noShorts:'У цьому місяці немає інструментів зі стійким падінням.',
+    cmp:m=>`${m}: перевага, історія та останні два роки`, cmpH:'Перевага показує, що частіше було в минулому, а не прогноз. Середнє зростання й середнє падіння показують, наскільки великі місяці в плюс і в мінус: перевага за роками мало варта, якщо падіння в рази більші за зростання. «Усередині місяця» показує, як зазвичай ішли 1–10, 11–20 і 21–31 число: підсвічені частини з повторюваністю 14+ із 20.',
+    onlyEdge:'З перевагою', all:'Усі',
+    groups:{all:'Усі',metals:'Метали',oil:'Нафта',indices:'Індекси',fx:'Валюти',crosses:'Кроси'},
+    colParts:'Усередині місяця', partLbl:['1–10','11–20','21–31'],
+    colInst:'Інструмент', colBias:'Історична перевага', colYears:'Скільки років', colAvg:'Середній · медіана', colWL:'Сер. зростання · сер. падіння',
+    biasUp:'частіше зростання', biasDn:'частіше падіння', biasNone:'немає переваги',
+    conflict:'середній і більшість років сперечаються',
+    inProgress:'триває', ahead:'попереду', noData:'немає даних', hit:'збіглося', miss:'проти',
+    noEdgeRows:'У цьому місяці немає інструментів з перевагою у вибраній групі.',
+    plan:'План на 12 місяців уперед', planH:'Що історично частіше зростало й падало в кожному з найближчих місяців. ↑16/20 означає зростав 16 років із 20. Жирні: висока повторюваність. Натисни на рядок, щоб відкрити місяць.',
+    colMonth:'Місяць', colL:'Частіше зростали', colS:'Частіше падали', noneSteady:'немає стійких', curMonth:'поточний місяць',
+    heat:'Усі інструменти за місяцями', heatH:'Зверху середній хід за місяць у %, знизу скільки років із 20 було зростання (↑16/20) або падіння (↓14/20). Наведи на клітинку, щоб побачити медіану та середнє зростання й падіння. Натисни на місяць у шапці або на клітинку, щоб вибрати місяць.',
+    swipe:'Таблицю можна гортати вбік →. Натисни на клітинку, щоб побачити деталі.',
+    lgUp:'частіше зростання', lgDn:'частіше падіння', lgBright:'що яскравіше, то частіше повторювалося', lgFlat:'сіра: переваги немає або повторюваність низька', lgCf:'! середній хід і більшість років у різні боки',
+    tAvg:'Середній хід', tMed:'Медіана', tWin:'Середнє зростання', tLoss:'Середнє падіння', tAbs:'Типовий хід',
+    tCf:'Середній хід витягли кілька сильних років, більшість років в інший бік. Переваги немає.',
+    loading:'Завантажую дані…', loadErr:'Не вдалося завантажити дані. Онови сторінку.',
+    method:'Як рахувалося і як користуватися',
+    methodList:(a,b)=>[
+      `Період: останні 20 повних років, зараз ${a}–${b}. Щосічня період зсувається автоматично.`,
+      'Хід місяця: від закриття минулого місяця до закриття цього. Для кожного місяця рахуються середній хід, медіана (серединне значення, на неї не впливають поодинокі викиди), скільки років було зростання, середнє зростання в плюсові роки та середнє падіння в мінусові.',
+      'Перевага є, лише якщо все вказує в один бік: 13+ років із 20 в один бік, і середній хід, і медіана в той самий бік. Якщо середній хід у плюсі, а більшість років у мінусі (пара величезних років витягла середнє), переваги немає, клітинка сіра з «!».',
+      'Історична повторюваність: висока 16+ років із 20, середня 14–15, низька 13. Це частота в минулому, а не ймовірність: 16 із 20 не означає 80% шансу зростання цього року. Низька повторюваність часто випадкова (інструментів і місяців сотні, і 13 із 20 саме по собі випадає приблизно в 13% клітинок), тому такі клітинки не підсвічуються кольором.',
+      'Усередині місяця: кожен місяць ділиться на три частини: з 1 по 10 число (від закриття минулого місяця), з 11 по 20 і з 21 до закриття місяця. Для кожної частини рахується те саме: скільки років було зростання, середній хід і медіана. Чим коротший відрізок, тим більше шуму, тому кольором виділяються лише частини з повторюваністю 14+ із 20.',
+      'Дивись на середнє зростання й середнє падіння: «зростав 16 із 20 років» погано, якщо середнє зростання +2%, а середнє падіння −5%.',
+      'Дані: місячні закриття Yahoo Finance. Метали й нафта це найближчі ф’ючерси (GC, SI, PL, CL, BZ), при зміні контракту окремі місяці можуть зсуватися на 1–2% відносно CFD. Індекси касові, валюти спот. Сервер оновлює дані раз на 12 годин; якщо джерело недоступне, береться резервна копія.',
+      'Сезонність це фільтр напрямку на місяць, а не сигнал на вхід і не прогноз. Вхід лише за сетапом. Сильні новини (війна, ФРС, криза) легко перекривають сезонність.'],
+    foot:'Не є інвестиційною рекомендацією. Минулі результати не гарантують майбутніх.'
+  },
+  en:{
+    title:'Market Seasonality',
+    mShort:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    mFull:['January','February','March','April','May','June','July','August','September','October','November','December'],
+    mIn:['January','February','March','April','May','June','July','August','September','October','November','December'],
+    now:'now',
+    stats:(a,b)=>`Statistics ${a}–${b}`, updated:d=>`updated ${d}`,
+    live:'Yahoo Finance data, updated automatically', fallback:'backup copy of the data', failed:n=>`${n} instr. from backup`,
+    lede:(n)=>[`In `,`, over ${n} years, the most consistent riser was `,`, and the most consistent faller was `,`.`],
+    ledeNoDn:(n)=>[`In `,`, over ${n} years, the most consistent riser was `,`, and no instrument fell consistently.`],
+    ledeNoUp:(n)=>[`In `,`, over ${n} years, no instrument rose consistently, and the most consistent faller was `,`.`],
+    ledeNone:(n)=>[`In `,`, over ${n} years, no instrument rose or fell consistently.`],
+    none:'no instrument',
+    ofN:(c,n)=>`${c} of ${n} years`, rose:(c,n)=>`up ${c} of ${n} yrs`, fell:(c,n)=>`down ${c} of ${n} yrs`,
+    lvl:['no edge','low','medium','high'],
+    levelsLine:'Historical repeatability:', lvDesc:['high: 16+ of 20 years','medium: 14–15 of 20','low: 13 of 20, can be chance'],
+    longs:'Rose more often', longsH:'The month closed up in 13 of 20 years or more, and both the average and the median are positive.',
+    shorts:'Fell more often', shortsH:'The month closed down in 13 of 20 years or more, and both the average and the median are negative.',
+    active:'Most movement', activeH:'Typical move: average size of the monthly close-to-close move regardless of direction (not High–Low). ×1.3 means the instrument moves 30% more this month than in its usual month.',
+    usual:'usually',
+    noLongs:'No instrument has a steady rise this month.', noShorts:'No instrument has a steady fall this month.',
+    cmp:m=>`${m}: edge, history and the last two years`, cmpH:'The edge shows what happened more often in the past, not a forecast. Average gain and average loss show how big the up and down months are: a count edge is worth little if losses are several times bigger than gains. "Within the month" shows how days 1–10, 11–20 and 21–31 usually went: parts that repeated 14+ of 20 years are highlighted.',
+    onlyEdge:'With an edge', all:'All',
+    groups:{all:'All',metals:'Metals',oil:'Oil',indices:'Indices',fx:'FX',crosses:'Crosses'},
+    colParts:'Within the month', partLbl:['1–10','11–20','21–31'],
+    colInst:'Instrument', colBias:'Historical edge', colYears:'Years', colAvg:'Average · median', colWL:'Avg gain · avg loss',
+    biasUp:'mostly up', biasDn:'mostly down', biasNone:'no edge',
+    conflict:'average and most years disagree',
+    inProgress:'in progress', ahead:'ahead', noData:'no data', hit:'matched', miss:'against',
+    noEdgeRows:'No instruments with an edge in the selected group this month.',
+    plan:'12-month plan', planH:'What historically rose and fell more often in each of the coming months. ↑16/20 means up 16 of 20 years. Bold: high repeatability. Tap a row to open that month.',
+    colMonth:'Month', colL:'Rose more often', colS:'Fell more often', noneSteady:'none steady', curMonth:'current month',
+    heat:'All instruments by month', heatH:'Top: average monthly move in %, bottom: how many of 20 years it rose (↑16/20) or fell (↓14/20). Hover a cell for the median and average gain and loss. Tap a month in the header or a cell to select it.',
+    swipe:'Swipe the table sideways →. Tap a cell for details.',
+    lgUp:'mostly up', lgDn:'mostly down', lgBright:'brighter means it repeated more often', lgFlat:'grey: no edge or low repeatability', lgCf:'! average and most years point different ways',
+    tAvg:'Average move', tMed:'Median', tWin:'Average gain', tLoss:'Average loss', tAbs:'Typical move',
+    tCf:'A few big years pulled the average one way while most years went the other. No edge.',
+    loading:'Loading data…', loadErr:'Could not load data. Refresh the page.',
+    method:'How it is calculated and how to use it',
+    methodList:(a,b)=>[
+      `Period: the last 20 full years, now ${a}–${b}. The window moves forward automatically every January.`,
+      'Monthly move: from the previous month close to this month close. For each month: average move, median (the middle value, not affected by single outliers), number of up years, average gain in up years and average loss in down years.',
+      'There is an edge only when everything points one way: 13+ of 20 years in one direction, and both the average and the median in that direction. If the average is positive but most years are negative (a couple of huge years pulled the average), there is no edge and the cell is grey with "!".',
+      'Historical repeatability: high 16+ of 20 years, medium 14–15, low 13. This is a past frequency, not a probability: 16 of 20 does not mean an 80% chance of a rise this year. Low repeatability is often chance (there are hundreds of instrument-month cells, and 13 of 20 alone shows up in about 13% of them), so those cells are not coloured.',
+      'Within the month: each month is split into three parts: days 1–10 (from the previous month close), 11–20 and 21 to the month close. Each part gets the same statistics: up years, average and median. Shorter periods are noisier, so only parts with 14+ of 20 repeatability are coloured.',
+      'Check average gain against average loss: "up 16 of 20 years" is bad if the average gain is +2% and the average loss is −5%.',
+      'Data: Yahoo Finance monthly closes. Metals and oil are front-month futures (GC, SI, PL, CL, BZ); on contract rolls single months can differ from CFDs by 1–2%. Indices are cash, FX is spot. The server refreshes every 12 hours; if the source is down a backup copy is used.',
+      'Seasonality is a monthly direction filter, not an entry signal and not a forecast. Enter only on your setup. Major news (war, Fed, crises) easily overrides seasonality.'],
+    foot:'Not investment advice. Past performance does not guarantee future results.'
+  }
+};
+
+/* ── STATE ── */
+let currentLang = 'ru';
+const today = new Date();
+const NOW_M = today.getMonth() + 1, NOW_Y = today.getFullYear();
+let SEL = NOW_M, GROUP = 'all', MODE = 'edge', DATA = null;
+const TOUCH = (() => { try { return window.matchMedia('(hover: none)').matches; } catch (e) { return false; } })();
+document.addEventListener('click', (e) => { if (TOUCH && !e.target.closest('.heat td')) document.querySelectorAll('.tip').forEach((x) => { x.hidden = true; }); });
+function store(k,v){ try{ localStorage.setItem(k,v) }catch(e){} }
+function load(k){ try{ return localStorage.getItem(k) }catch(e){ return null } }
+const T = () => L[currentLang];
+const fmt = (x, d=1) => x == null ? '—' : (x > 0 ? '+' : x < 0 ? '−' : '') + Math.abs(x).toFixed(d);
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+const nameOf = (ins) => ins.name ? ins.name[currentLang] : '';
+const st = (id, m) => DATA && DATA.stats[id] ? DATA.stats[id][m-1] : null;
+const avail = () => INST.filter((i) => DATA && DATA.stats[i.id]);
+const inGroup = (i) => GROUP === 'all' || i.group === GROUP;
+
+/* ── THEME / LANG ── */
+function applyTheme(t){ document.body.classList.toggle('light', t === 'light'); document.getElementById('theme-btn').textContent = t === 'light' ? '☾' : '☀︎'; document.querySelector('meta[name=theme-color]').setAttribute('content', t === 'light' ? '#f5f5f5' : '#0f0f0f'); }
+function toggleTheme(){ const t = document.body.classList.contains('light') ? 'dark' : 'light'; applyTheme(t); store('season_theme', t); }
+function setLang(l){ currentLang = l; store('season_lang', l); document.getElementById('htmlLang').lang = l === 'ua' ? 'uk' : l; ['ru','ua','en'].forEach((x) => document.getElementById('lang-'+x).classList.toggle('active', x === l)); renderAll(); }
+
+/* ── STATISTICS MODEL ──
+   dir: +1 most years up, −1 most years down
+   k: number of years in that direction
+   level: 0 none, 1 weak (13/20), 2 medium (14–15/20), 3 strong (16+/20); only when average and median agree with dir
+   conflict: count says one way, average or median the other */
+function an(s){
+  if (!s) return { dir:0, k:0, n:0, level:0, sign:0, conflict:false };
+  const n = s.n, c = Math.round(s.up * n / 100);
+  const dir = c * 2 > n ? 1 : c * 2 < n ? -1 : 0;
+  const k = dir > 0 ? c : n - c, share = n ? k / n : 0;
+  const agrees = dir !== 0 && Math.sign(s.avg) === dir && s.med * dir >= 0;
+  let level = 0;
+  if (agrees) level = share >= 0.8 ? 3 : share >= 0.7 ? 2 : share >= 0.65 ? 1 : 0;
+  return { dir, k, n, c, level, sign: level ? dir : 0, conflict: dir !== 0 && share >= 0.6 && !agrees };
+}
+const dirTxt = (s) => { const a = an(s), t = T(); return a.dir >= 0 ? t.rose(a.c, a.n) : t.fell(a.k, a.n); };
+const dirShort = (s) => { const a = an(s); return (a.dir >= 0 ? '↑' + a.c : '↓' + a.k) + '/' + a.n; };
+function segBox(s, label){
+  const box = el('span','sg');
+  box.append(el('span','sl', label));
+  if (!s) { box.append(el('span','sv','—')); return box; }
+  const a = an(s);
+  if (a.level >= 2) { box.classList.add('on'); box.style.background = `rgba(var(${a.sign > 0 ? '--heat-up' : '--heat-dn'}),${a.level === 3 ? .5 : .28})`; }
+  box.append(el('span','sv', dirShort(s)), el('span','sa', fmt(s.avg) + '%'));
+  box.title = `${label}: ${dirTxt(s)}, ${T().tAvg.toLowerCase()} ${fmt(s.avg)}%, ${T().tMed.toLowerCase()} ${fmt(s.med)}%`;
+  return box;
+}
+function segRow(id, m){ const p = DATA && DATA.parts && DATA.parts[id]; if (!p) return null; const w = el('span','seg'); p[m-1].forEach((s, j) => w.append(segBox(s, T().partLbl[j]))); return w; }
+function lvBadge(level, dir){ const b = el('span', 'lv l' + level + (dir > 0 ? ' up' : ' dn'), T().lvl[level]); return b; }
+function rank(a, b, m){ const A = an(st(a.id, m)), B = an(st(b.id, m)); return (B.level - A.level) || (B.k - A.k) || (Math.abs(st(b.id, m).med) - Math.abs(st(a.id, m).med)); }
+function longsFor(m){ return avail().filter((i) => an(st(i.id,m)).sign === 1).sort((a,b) => rank(a,b,m)); }
+function shortsFor(m){ return avail().filter((i) => an(st(i.id,m)).sign === -1).sort((a,b) => rank(a,b,m)); }
+function yearsN(){ return DATA ? DATA.period[1] - DATA.period[0] + 1 : 20; }
+
+/* ── RENDER: static text ── */
+function renderText(){
+  const t = T();
+  document.title = t.title + ' | Market Seasonality';
+  document.getElementById('t-title').textContent = t.title;
+  [['t-longs','longs'],['t-longs-h','longsH'],['t-shorts','shorts'],['t-shorts-h','shortsH'],['t-active','active'],['t-active-h','activeH'],['t-cmp-h','cmpH'],['t-plan','plan'],['t-plan-h','planH'],['t-heat','heat'],['t-heat-h','heatH'],['t-method','method'],['t-foot','foot'],['t-swipe','swipe']].forEach(([id,k]) => { document.getElementById(id).textContent = t[k]; });
+  const lv = document.getElementById('levels'); lv.replaceChildren(el('span', null, t.levelsLine));
+  t.lvDesc.forEach((d, i) => { const s = el('span'); s.append(lvBadge(3 - i, 1), ' ', d.split(':')[1].trim()); s.firstChild.style.marginLeft = '0'; lv.append(s); });
+  const lg = document.getElementById('legend'); lg.replaceChildren();
+  [['--heat-up', t.lgUp], ['--heat-dn', t.lgDn]].forEach(([v, txt]) => { const s = el('span'); [0.28, 0.5].forEach((a) => { const sw = el('i','sw'); sw.style.background = `rgba(var(${v}),${a})`; sw.style.marginRight = '2px'; s.append(sw); }); s.append(' ' + txt); lg.append(s); });
+  lg.append(el('span', null, t.lgBright));
+  const g = el('span'); const gs = el('i','sw'); gs.style.background = 'var(--neutral)'; gs.style.border = '1px solid var(--border)'; g.append(gs, t.lgFlat); lg.append(g);
+  const cf = el('span', null, t.lgCf); cf.style.color = 'var(--yellow)'; lg.append(cf);
+  const ml = document.getElementById('method-list'); ml.replaceChildren(...t.methodList(DATA ? DATA.period[0] : 2006, DATA ? DATA.period[1] : 2025).map((x) => el('li', null, x)));
+}
+
+function renderMeta(){
+  const t = T(), box = document.getElementById('meta'); box.replaceChildren();
+  if (!DATA) return;
+  box.append(el('span','pill', t.stats(DATA.period[0], DATA.period[1])));
+  const d = new Date(DATA.updated);
+  const ds = isNaN(d) ? DATA.updated : d.toLocaleDateString(currentLang === 'ua' ? 'uk-UA' : currentLang === 'en' ? 'en-GB' : 'ru-RU', {day:'numeric', month:'short', year:'numeric'});
+  const p2 = el('span','pill'); p2.append(el('i','dot' + (DATA.source === 'yahoo' ? '' : ' warn')), (DATA.source === 'yahoo' ? t.live : t.fallback) + ' · ' + t.updated(ds)); box.append(p2);
+  if (DATA.failed && DATA.failed.length && DATA.source === 'yahoo') box.append(el('span','pill', t.failed(DATA.failed.length)));
+}
+
+function renderMonths(){
+  const t = T(), nav = document.getElementById('months'); nav.replaceChildren();
+  t.mShort.forEach((m, i) => {
+    const b = el('button','m-btn' + (i+1 === SEL ? ' active' : '') + (i+1 === NOW_M ? ' now' : ''));
+    b.type = 'button'; b.textContent = m; b.setAttribute('aria-pressed', i+1 === SEL);
+    if (i+1 === NOW_M) b.append(el('span','now-tag', t.now));
+    b.onclick = () => selectMonth(i+1);
+    nav.append(b);
+  });
+  const a = nav.querySelector('.m-btn.active');
+  if (a && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = a.offsetLeft - nav.clientWidth / 2 + a.offsetWidth / 2;
+}
+
+function renderLede(){
+  const t = T(), p = document.getElementById('lede'); p.replaceChildren();
+  if (!DATA) { p.textContent = t.loading; return; }
+  const l = longsFor(SEL)[0], s = shortsFor(SEL)[0];
+  const mk = (i, cls) => { if (!i) return el('b', null, t.none); const a = an(st(i.id, SEL)); return el('b', cls, `${i.id} (${t.ofN(a.k, a.n)})`); };
+  const n = yearsN(); let parts, items;
+  if (l && s) { parts = t.lede(n); items = [mk(l, 'g'), mk(s, 'r')]; }
+  else if (l) { parts = t.ledeNoDn(n); items = [mk(l, 'g')]; }
+  else if (s) { parts = t.ledeNoUp(n); items = [mk(s, 'r')]; }
+  else { parts = t.ledeNone(n); items = []; }
+  p.append(parts[0], el('b', null, t.mIn[SEL-1]), (currentLang === 'en' ? '' : ' ') + parts[1]);
+  items.forEach((x, i) => p.append(x, parts[i + 2]));
+}
+
+function item(i, m){
+  const s = st(i.id, m), a = an(s), li = el('li','li');
+  const left = el('span'); const nm = el('span','s', i.id); left.append(nm, lvBadge(a.level, a.dir)); if (nameOf(i)) left.append(el('span','n', nameOf(i)));
+  const right = el('span','r'); right.append(el('span','v ' + (s.avg >= 0 ? 'up' : 'dn'), fmt(s.avg) + '%'), el('span','u', dirTxt(s)));
+  li.append(left, right); return li;
+}
+function renderCards(){
+  const t = T();
+  const fill = (id, list, emptyTxt) => { const ol = document.getElementById(id); ol.replaceChildren(...(list.length ? list.map((i) => item(i, SEL)) : [el('li','empty', DATA ? emptyTxt : t.loading)])); };
+  fill('longs', DATA ? longsFor(SEL) : [], t.noLongs);
+  fill('shorts', DATA ? shortsFor(SEL) : [], t.noShorts);
+  const ol = document.getElementById('active'); ol.replaceChildren();
+  if (!DATA) { ol.append(el('li','empty', t.loading)); return; }
+  avail().map((i) => {
+    const arr = DATA.stats[i.id].filter(Boolean); const mean = arr.reduce((a, b) => a + b.abs, 0) / arr.length;
+    const s = st(i.id, SEL); return { i, r: s ? s.abs / mean : 0, s, mean };
+  }).filter((x) => x.s).sort((a, b) => b.r - a.r).slice(0, 7).forEach(({i, r, s, mean}) => {
+    const li = el('li','li'); const left = el('span'); left.append(el('span','s', i.id)); if (nameOf(i)) left.append(el('span','n', nameOf(i)));
+    const right = el('span','r'); right.append(el('span','v', '×' + r.toFixed(2)), el('span','u', `±${s.abs.toFixed(1)}% · ${t.usual} ±${mean.toFixed(1)}%`));
+    li.append(left, right); ol.append(li);
+  });
+}
+
+function renderFilters(){
+  const t = T();
+  const g = document.getElementById('groups'); g.replaceChildren();
+  ['all','metals','oil','indices','fx','crosses'].forEach((k) => { const b = el('button','chip' + (GROUP === k ? ' active' : ''), t.groups[k]); b.type = 'button'; b.onclick = () => { GROUP = k; renderFilters(); renderCompare(); renderHeat(); }; g.append(b); });
+  const md = document.getElementById('cmp-mode'); md.replaceChildren();
+  [['edge', t.onlyEdge], ['all', t.all]].forEach(([k, txt]) => { const b = el('button','chip' + (MODE === k ? ' active' : ''), txt); b.type = 'button'; b.onclick = () => { MODE = k; renderFilters(); renderCompare(); }; md.append(b); });
+}
+
+function valCell(v, note){
+  const td = el('td','num');
+  if (v == null) { td.append(el('span','muted', note || '—')); return td; }
+  td.append(el('span', v >= 0 ? 'up' : 'dn', fmt(v) + '%'));
+  if (note) td.append(el('span','sub', note));
+  return td;
+}
+function renderCompare(){
+  const t = T(), tb = document.getElementById('cmp'); tb.replaceChildren();
+  document.getElementById('t-cmp').textContent = t.cmp(t.mFull[SEL-1]);
+  if (!DATA) { tb.insertRow().insertCell().textContent = t.loading; return; }
+  const hr = tb.createTHead().insertRow();
+  const hasParts = !!(DATA.parts && Object.keys(DATA.parts).length);
+  [[t.colInst,''],[t.colBias,''],[t.colYears,''],...(hasParts ? [[t.colParts,'']] : []),[t.colAvg,'num'],[t.colWL,'num'],[String(DATA.prevYear),'num'],[String(DATA.curYear),'num']].forEach(([x, c]) => hr.append(el('th', c, x)));
+  const body = tb.createTBody();
+  let rows = avail().filter(inGroup);
+  if (MODE === 'edge') rows = rows.filter((i) => an(st(i.id, SEL)).level > 0);
+  rows.sort((a, b) => rank(a, b, SEL));
+  if (!rows.length) { const td = body.insertRow().insertCell(); td.colSpan = hasParts ? 8 : 7; td.className = 'empty'; td.textContent = t.noEdgeRows; return; }
+  rows.forEach((i) => {
+    const s = st(i.id, SEL), a = an(s), tr = body.insertRow();
+    const ti = el('td','inst'); ti.append(el('b', null, i.id)); if (nameOf(i)) ti.append(el('span', null, nameOf(i))); tr.append(ti);
+    const tbias = el('td','nw bcell');
+    if (a.level) { const b = el('span','bias ' + (a.sign > 0 ? 'up' : 'dn'), (a.sign > 0 ? '↑ ' + t.biasUp : '↓ ' + t.biasDn)); tbias.append(b, lvBadge(a.level, a.sign)); }
+    else { tbias.append(el('span','muted', '— ' + t.biasNone)); if (a.conflict) tbias.append(el('span','warn-txt', '! ' + t.conflict)); }
+    tr.append(tbias);
+    const ty = el('td','nw ycell'); ty.dataset.label = t.colYears; ty.append(document.createTextNode(dirTxt(s)));
+    const bar = el('span','bar'); const fi = el('i'); fi.style.width = (a.k / a.n * 100) + '%'; fi.style.background = a.dir >= 0 ? 'var(--green)' : 'var(--red)'; bar.append(fi); ty.append(bar); tr.append(ty);
+    if (hasParts) { const tp = el('td','pcell'); tp.dataset.label = t.colParts; const sr = segRow(i.id, SEL); tp.append(sr || el('span','muted','—')); tr.append(tp); }
+    const tav = el('td','num'); tav.dataset.label = t.colAvg; tav.append(el('span', s.avg >= 0 ? 'up' : 'dn', fmt(s.avg) + '%'), el('span','match', fmt(s.med) + '%')); tr.append(tav);
+    const twl = el('td','num'); twl.dataset.label = t.colWL; twl.append(el('span','up', s.avgUp != null ? fmt(s.avgUp) + '%' : '—'), el('span','muted', ' · '), el('span','dn', s.avgDn != null ? fmt(s.avgDn) + '%' : '—')); tr.append(twl);
+    const act = DATA.actual[i.id] || {};
+    const hm = (v) => (v == null || !a.level) ? '' : ((v > 0) === (a.sign > 0) ? '✓ ' + t.hit : '✗ ' + t.miss);
+    const pv = act.prev ? act.prev[SEL-1] : null;
+    const tpv = valCell(pv, pv == null ? t.noData : hm(pv)); tpv.dataset.label = String(DATA.prevYear); tr.append(tpv);
+    let cv = act.cur ? act.cur[SEL-1] : null, note;
+    if (DATA.curYear === NOW_Y && SEL > NOW_M) { cv = null; note = t.ahead; }
+    else if (DATA.curYear === NOW_Y && SEL === NOW_M) note = t.inProgress;
+    else note = cv == null ? t.noData : hm(cv);
+    const tcv = valCell(cv, note); tcv.dataset.label = String(DATA.curYear); tr.append(tcv);
+  });
+}
+
+function renderPlan(){
+  const t = T(), tb = document.getElementById('plan'); tb.replaceChildren();
+  if (!DATA) return;
+  const hr = tb.createTHead().insertRow(); [t.colMonth, t.colL, t.colS].forEach((x) => hr.append(el('th', null, x)));
+  const body = tb.createTBody();
+  for (let k = 0; k < 12; k++) {
+    const m = ((NOW_M - 1 + k) % 12) + 1, y = NOW_Y + Math.floor((NOW_M - 1 + k) / 12);
+    const tr = body.insertRow(); tr.className = 'pr' + (m === SEL ? ' sel' : '');
+    const tm = el('td','mo', t.mFull[m-1] + ' ' + y); if (k === 0) tm.append(el('span', null, t.curMonth)); tr.append(tm);
+    const cell = (list, cls) => { const td = el('td'); td.dataset.label = cls === 'l' ? t.colL : t.colS; if (!list.length) td.append(el('span','muted', t.noneSteady)); list.forEach((i) => { const s = st(i.id, m); td.append(el('span','tag ' + cls + ' t' + an(s).level, i.id + ' ' + dirShort(s))); }); return td; };
+    tr.append(cell(longsFor(m), 'l'), cell(shortsFor(m), 's'));
+    tr.onclick = () => { selectMonth(m); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  }
+}
+
+function renderHeat(){
+  const t = T(), box = document.getElementById('heat-box'); box.replaceChildren();
+  if (!DATA) { box.append(el('div','skeleton', t.loading)); return; }
+  const tip = el('div','tip'); tip.hidden = true;
+  const tb = el('table','heat'), hr = tb.createTHead().insertRow();
+  hr.append(el('th','row',''));
+  t.mShort.forEach((m, i) => {
+    const th = el('th','mh' + (i+1 === SEL ? ' sel' : '') + (i+1 === NOW_M ? ' now' : ''), m);
+    if (i+1 === NOW_M) th.append(el('span', null, t.now));
+    th.onclick = () => selectMonth(i+1); hr.append(th);
+  });
+  const body = tb.createTBody(); let lastG = null;
+  avail().filter(inGroup).forEach((i) => {
+    if (i.group !== lastG) { const gr = body.insertRow(); gr.className = 'grp'; const gt = el('th'); gt.append(el('span','gl', t.groups[i.group])); gt.colSpan = 13; gr.append(gt); lastG = i.group; }
+    const tr = body.insertRow(); const th = el('th','row', i.id); if (nameOf(i)) th.append(el('span', null, nameOf(i))); tr.append(th);
+    DATA.stats[i.id].forEach((s, k) => {
+      const td = el('td', k+1 === SEL ? 'sel' : '');
+      if (!s) { td.classList.add('nil'); td.append(el('span','a','—')); tr.append(td); return; }
+      const a = an(s);
+      if (a.level >= 2) td.style.background = `rgba(var(${a.sign > 0 ? '--heat-up' : '--heat-dn'}),${[0, 0, .28, .5][a.level]})`;
+      else td.classList.add('nil');
+      if (a.conflict) td.classList.add('cf');
+      td.append(el('span','a', fmt(s.avg)), el('span','w', dirShort(s)));
+      const show = () => {
+        const act = DATA.actual[i.id] || {};
+        const lines = [el('b', null, i.id + ' · ' + t.mFull[k])];
+        const bias = el('div'); if (a.level) { bias.append(el('span', a.sign > 0 ? 'up' : 'dn', a.sign > 0 ? '↑ ' + t.biasUp : '↓ ' + t.biasDn), lvBadge(a.level, a.sign)); } else bias.append(el('span','muted', t.biasNone)); lines.push(bias);
+        lines.push(el('div', null, dirTxt(s)), el('hr'));
+        lines.push(el('div', null, `${t.tAvg}: ${fmt(s.avg)}%`), el('div', null, `${t.tMed}: ${fmt(s.med)}%`));
+        if (s.avgUp != null || s.avgDn != null) lines.push(el('div', null, `${t.tWin}: ${fmt(s.avgUp)}%`), el('div', null, `${t.tLoss}: ${fmt(s.avgDn)}%`));
+        lines.push(el('div', null, `${t.tAbs}: ±${s.abs.toFixed(1)}%`));
+        const sr = segRow(i.id, k+1); if (sr) { lines.push(el('hr'), el('div', null, t.colParts)); sr.className = 'tseg'; lines.push(sr); }
+        const pv = act.prev && act.prev[k], cv = act.cur && act.cur[k];
+        if (pv != null || cv != null) lines.push(el('hr'));
+        if (pv != null) lines.push(el('div', null, `${DATA.prevYear}: ${fmt(pv)}%`));
+        if (cv != null) lines.push(el('div', null, `${DATA.curYear}: ${fmt(cv)}%` + (DATA.curYear === NOW_Y && k+1 === NOW_M ? ' (' + t.inProgress + ')' : '')));
+        if (a.conflict) { lines.push(el('hr')); lines.push(el('div','warn-txt', '! ' + t.tCf)); }
+        tip.replaceChildren(...lines); tip.hidden = false;
+        const b = box.getBoundingClientRect(), c = td.getBoundingClientRect();
+        const tw = tip.offsetWidth || 230;
+        let left = c.right - b.left + box.scrollLeft + 6;
+        if (c.right + tw + 12 > window.innerWidth) left = c.left - b.left + box.scrollLeft - tw - 6;
+        const minL = box.scrollLeft + 4, maxL = box.scrollLeft + box.clientWidth - tw - 4;
+        tip.style.left = Math.max(minL, Math.min(left, maxL)) + 'px';
+        let top = c.top - b.top + box.scrollTop; const maxTop = box.scrollHeight - tip.offsetHeight - 4; tip.style.top = Math.max(4, Math.min(top, maxTop)) + 'px';
+      };
+      td.dataset.key = i.id + '-' + k; td._show = show;
+      td.onmouseenter = () => { if (!TOUCH) show(); }; td.onmouseleave = () => { if (!TOUCH) tip.hidden = true; };
+      td.onclick = () => {
+        selectMonth(k+1);
+        if (TOUCH) { const nt = document.querySelector('.heat td[data-key="' + i.id + '-' + k + '"]'); if (nt && nt._show) nt._show(); }
+      };
+      tr.append(td);
+    });
+  });
+  box.append(tb, tip);
+}
+
+function selectMonth(m){
+  SEL = m;
+  const box = document.getElementById('heat-box'); const sl = box ? box.scrollLeft : 0;
+  renderMonths(); renderLede(); renderCards(); renderCompare(); renderPlan(); renderHeat();
+  if (box) box.scrollLeft = sl;
+}
+function renderAll(){ renderText(); renderMeta(); renderMonths(); renderLede(); renderCards(); renderFilters(); renderCompare(); renderPlan(); renderHeat(); }
+
+/* ── DATA ── */
+async function getJSON(url){ const r = await fetch(url, { cache: 'no-cache' }); if (!r.ok) throw new Error(r.status); return r.json(); }
+async function loadData(){
+  try { DATA = await getJSON('/api/seasonality'); if (!DATA || !DATA.stats) throw new Error('bad'); }
+  catch (e) { try { DATA = await getJSON('data/fallback.json'); DATA.source = 'fallback'; } catch (e2) { DATA = null; document.getElementById('lede').textContent = T().loadErr; return; } }
+  renderAll();
+}
+
+/* ── INIT ── */
+(function init(){
+  const th = load('season_theme'); applyTheme(th === 'light' ? 'light' : 'dark');
+  const lg = load('season_lang'); setLang(lg && L[lg] ? lg : ((navigator.language || '').startsWith('uk') ? 'ua' : 'ru'));
+  loadData();
+})();
+</script>
+</body>
+</html>
