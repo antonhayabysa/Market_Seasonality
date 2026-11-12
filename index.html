@@ -82,11 +82,17 @@
     .match{font-size:11px;color:var(--text-muted);margin-left:6px}
     .warn-txt{color:var(--yellow);font-size:11px;display:block}
     .seg{display:inline-flex;gap:4px}
-    .sg{min-width:56px;border-radius:6px;padding:4px 6px;background:var(--neutral);text-align:center;line-height:1.25}
-    .sg .sl{display:block;font-size:10px;color:var(--text-muted)}
-    .sg .sv{display:block;font-size:12px;font-weight:600;color:var(--text-muted)}
-    .sg .sa{display:block;font-size:10px;color:var(--text-muted)}
-    .sg.on .sv{color:var(--text)}
+    .sg{min-width:64px;border-radius:8px;padding:5px 8px;background:var(--bg3);border:1px solid transparent;text-align:center;line-height:1.3}
+    .sg .sl{display:block;font-size:11px;color:var(--text-muted)}
+    .sg .sv{display:block;font-size:13px;font-weight:600;color:var(--text-muted)}
+    .sg .sa{display:block;font-size:11px;color:var(--text-muted)}
+    .sg.on.up{background:rgba(var(--heat-up),.12);border-color:rgba(var(--heat-up),.5)}
+    .sg.on.dn{background:rgba(var(--heat-dn),.12);border-color:rgba(var(--heat-dn),.5)}
+    .sg.on.up.l3{background:rgba(var(--heat-up),.22);border-color:var(--green)}
+    .sg.on.dn.l3{background:rgba(var(--heat-dn),.22);border-color:var(--red)}
+    .sg.on.up .sv,.sg.on.up .sa{color:var(--green)}
+    .sg.on.dn .sv,.sg.on.dn .sa{color:var(--red)}
+    .sg.on .sl{color:var(--text)}
     .tip .tseg{display:flex;gap:4px;margin-top:4px}
     .tip .sg{min-width:0;flex:1;padding:3px 4px}
     .plan tr.pr{cursor:pointer}
@@ -128,7 +134,7 @@
     .skeleton{color:var(--text-muted);font-size:13px;padding:16px}
     .cmp .bar{display:none}
     .cmp th,.cmp td{padding:9px 9px}
-    @media (max-width:1090px){
+    @media (max-width:1120px){
       .mob-only{display:block}
       .cmp thead{display:none}
       .cmp,.cmp tbody{display:block}
@@ -442,7 +448,7 @@ function segBox(s, label){
   box.append(el('span','sl', label));
   if (!s) { box.append(el('span','sv','—')); return box; }
   const a = an(s);
-  if (a.level >= 2) { box.classList.add('on'); box.style.background = `rgba(var(${a.sign > 0 ? '--heat-up' : '--heat-dn'}),${a.level === 3 ? .5 : .28})`; }
+  if (a.level >= 2) box.classList.add('on', a.sign > 0 ? 'up' : 'dn', 'l' + a.level);
   box.append(el('span','sv', dirShort(s)), el('span','sa', fmt(s.avg) + '%'));
   box.title = `${label}: ${dirTxt(s)}, ${T().tAvg.toLowerCase()} ${fmt(s.avg)}%, ${T().tMed.toLowerCase()} ${fmt(s.med)}%`;
   return box;
