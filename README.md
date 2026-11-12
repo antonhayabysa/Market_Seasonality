@@ -1,2 +1,21 @@
-# New-repository
-Market Seasonality is a financial analytics platform that visualizes 20 years of historical seasonal patterns across stocks, indices, forex, metals, and oil. Explore monthly trends, historical performance, average returns, and market seasonality in an interactive dashboard.
+# Сезонность рынков
+
+Сезонность за последние 20 полных лет для металлов, нефти, индексов и валют (инструменты FundedNext).
+Данные берутся с Yahoo Finance и обновляются сами: сервер пересчитывает их раз в 12 часов, а каждый январь период сдвигается на год вперёд.
+
+## Как задеплоить на Vercel (5 минут)
+
+1. Зайди на github.com → **New repository** → назови `seasonality` → **Create**.
+2. На странице репозитория нажми **uploading an existing file** и перетащи **содержимое** этой папки (`index.html`, `api`, `data`, `vercel.json`, `package.json`, `README.md`) → **Commit changes**.
+3. Зайди на vercel.com → **Add New… → Project** → выбери репозиторий `seasonality` → **Deploy**.
+   Никаких настроек и переменных окружения не нужно.
+4. Через минуту будет ссылка вида `seasonality-xxx.vercel.app`.
+
+Проверить, что данные живые: открой `https://<твой-домен>/api/seasonality`. В ответе должно быть `"source":"yahoo"`.
+Если Yahoo недоступен, сайт сам возьмёт резервную копию из `data/fallback.json` (на странице будет жёлтая точка).
+
+## Структура
+
+- `index.html` — страница (RU/UA/EN, светлая и тёмная тема)
+- `api/seasonality.js` — серверная функция: тянет месячные свечи Yahoo, считает статистику, кэш 12 ч
+- `data/fallback.json` — резервные данные на случай, если Yahoo не ответит

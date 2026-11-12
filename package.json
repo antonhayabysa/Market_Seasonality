@@ -1,0 +1,7 @@
+{
+  "name": "seasonality",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Market seasonality: 20-year monthly statistics for metals, oil, indices and FX",
+  "engines": { "node": ">=18" }
+}
