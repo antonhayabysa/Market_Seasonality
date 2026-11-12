@@ -124,6 +124,21 @@ function monthReturn(closes, y, m) {
   return round((closes[k] / closes[pk] - 1) * 100);
 }
 
+// Устойчивость: тот же месяц за последние 10 лет и за всю доступную историю (до 40 лет).
+// u = сколько лет рост, n = сколько лет есть, a = средний ход, yM = первый год истории.
+function windowsFor(closes, yMin, y1) {
+  const res = [];
+  for (let m = 1; m <= 12; m++) {
+    const all = [];
+    for (let y = yMin; y <= y1; y++) { const r = monthReturn(closes, y, m); if (r != null) all.push([y, r]); }
+    const last = all.filter((x) => x[0] >= y1 - 9);
+    const cnt = (a) => a.filter((x) => x[1] > 0).length;
+    const avg = (a) => (a.length ? round(a.reduce((q, x) => q + x[1], 0) / a.length) : null);
+    res.push({ u10: cnt(last), n10: last.length, a10: avg(last), uM: cnt(all), nM: all.length, aM: avg(all), yM: all.length ? all[0][0] : null });
+  }
+  return res;
+}
+
 function statsFor(closes, y0, y1) {
   const res = [];
   for (let m = 1; m <= 12; m++) {
@@ -140,6 +155,7 @@ function statsFor(closes, y0, y1) {
 async function fetchYahoo(symbol, fromYear) {
   const now = Math.floor(Date.now() / 1000);
   const p1 = Math.floor(Date.UTC(fromYear - 1, 10, 1) / 1000);
+  // fromYear: первый год окна (для максимальной истории это y1 - 39, то есть до 40 лет)
   const hosts = ['query1.finance.yahoo.com', 'query2.finance.yahoo.com'];
   let lastErr;
   for (const h of hosts) {
@@ -181,6 +197,7 @@ async function build() {
   const curYear = now.getUTCFullYear();
   const y1 = curYear - 1;
   const y0 = y1 - 19;
+  const yMin = y1 - 39; // максимальная история: до 40 лет
   const fb = loadFallback();
   const out = {
     source: 'yahoo',
@@ -191,11 +208,12 @@ async function build() {
     stats: {},
     actual: {},
     parts: {},
+    win: {},
     method: {},
     failed: [],
   };
   const results = await pool(INSTRUMENTS, 6, async (ins) => {
-    const json = await fetchYahoo(ins.yahoo, y0);
+    const json = await fetchYahoo(ins.yahoo, yMin);
     return parseDaily(json);
   });
   INSTRUMENTS.forEach((ins, k) => {
@@ -210,6 +228,7 @@ async function build() {
       for (let m = 1; m <= 12; m++) { prev.push(monthReturn(closes, y1, m)); cur.push(monthReturn(closes, curYear, m)); }
       out.actual[ins.id] = { prev, cur };
       out.method[ins.id] = 'close';
+      out.win[ins.id] = windowsFor(closes, yMin, y1);
       const pt = partsFor(pd, y0, y1);
       if (pt.every((m) => m.every((x) => x && x.n >= 15))) out.parts[ins.id] = pt;
     } else if (fb && fb.stats[ins.id]) {
@@ -243,4 +262,4 @@ module.exports = async (req, res) => {
   }
 };
 
-module.exports._test = { parseDaily, monthlyCloses, statsFor, partsFor, monthReturn, INSTRUMENTS, build };
+module.exports._test = { windowsFor, parseDaily, monthlyCloses, statsFor, partsFor, monthReturn, INSTRUMENTS, build };
