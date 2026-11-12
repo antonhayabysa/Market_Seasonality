@@ -44,21 +44,34 @@ function round(x, d = 2) {
   return Math.round(x * p) / p;
 }
 
-// Yahoo chart JSON -> { 'YYYY-MM': close }
+// Yahoo chart JSON (дневные свечи) -> { 'YYYY-MM': последнее закрытие месяца }
+// Месяц определяется по дате в часовом поясе биржи, поэтому переход на летнее время
+// и разные часовые пояса бирж не сдвигают месяцы.
 function monthlyCloses(json) {
   const r = json && json.chart && json.chart.result && json.chart.result[0];
   if (!r || !r.timestamp) throw new Error('no data');
-  const tz = (r.meta && r.meta.gmtoffset) || 0;
+  const meta = r.meta || {};
+  const tz = meta.gmtoffset || 0;
+  let fmt = null;
+  try {
+    if (meta.exchangeTimezoneName) fmt = new Intl.DateTimeFormat('en-CA', { timeZone: meta.exchangeTimezoneName, year: 'numeric', month: '2-digit' });
+  } catch (e) { fmt = null; }
   const adj = r.indicators.adjclose && r.indicators.adjclose[0] && r.indicators.adjclose[0].adjclose;
   const close = r.indicators.quote && r.indicators.quote[0] && r.indicators.quote[0].close;
   const vals = adj && adj.some((v) => v != null) ? adj : close;
   const out = {};
   r.timestamp.forEach((t, i) => {
     const v = vals[i];
-    if (v == null || !isFinite(v)) return;
-    const d = new Date((t + tz) * 1000);
-    const key = d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0');
-    out[key] = v; // если в месяце две точки, остаётся последняя
+    if (v == null || !isFinite(v) || v <= 0) return;
+    let key;
+    if (fmt) {
+      const p = fmt.formatToParts(new Date(t * 1000));
+      key = p.find((x) => x.type === 'year').value + '-' + p.find((x) => x.type === 'month').value;
+    } else {
+      const d = new Date((t + tz + 43200) * 1000);
+      key = d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0');
+    }
+    out[key] = v; // свечи идут по порядку, остаётся последнее закрытие месяца
   });
   return out;
 }
@@ -95,13 +108,14 @@ function statsFor(closes, y0, y1) {
   return res;
 }
 
-async function fetchYahoo(symbol) {
+async function fetchYahoo(symbol, fromYear) {
   const now = Math.floor(Date.now() / 1000);
+  const p1 = Math.floor(Date.UTC(fromYear - 1, 10, 1) / 1000);
   const hosts = ['query1.finance.yahoo.com', 'query2.finance.yahoo.com'];
   let lastErr;
   for (const h of hosts) {
     try {
-      const url = `https://${h}/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1mo&period1=915148800&period2=${now}&includeAdjustedClose=true`;
+      const url = `https://${h}/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&period1=${p1}&period2=${now}&includeAdjustedClose=true`;
       const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/json' } });
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return await r.json();
@@ -151,13 +165,16 @@ async function build() {
     failed: [],
   };
   const results = await pool(INSTRUMENTS, 6, async (ins) => {
-    const json = await fetchYahoo(ins.yahoo);
+    const json = await fetchYahoo(ins.yahoo, y0);
     return monthlyCloses(json);
   });
   INSTRUMENTS.forEach((ins, k) => {
     const closes = results[k];
-    if (closes && !closes.error && Object.keys(closes).length > 24) {
-      out.stats[ins.id] = statsFor(closes, y0, y1);
+    const st = closes && !closes.error ? statsFor(closes, y0, y1) : null;
+    // данные годятся, только если в каждом месяце есть хотя бы 15 лет из 20
+    const good = st && st.every((m) => m && m.n >= 15);
+    if (good) {
+      out.stats[ins.id] = st;
       const prev = [], cur = [];
       for (let m = 1; m <= 12; m++) { prev.push(monthReturn(closes, y1, m)); cur.push(monthReturn(closes, curYear, m)); }
       out.actual[ins.id] = { prev, cur };
