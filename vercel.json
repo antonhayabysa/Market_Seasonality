@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/seasonality.js": { "maxDuration": 30 }
+    "api/seasonality.js": { "maxDuration": 60 }
   },
   "headers": [
     {
