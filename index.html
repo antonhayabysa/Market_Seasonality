@@ -81,8 +81,15 @@
     .bias{display:inline-flex;align-items:center;gap:4px;font-weight:600;white-space:nowrap}
     .match{font-size:11px;color:var(--text-muted);margin-left:6px}
     .warn-txt{color:var(--yellow);font-size:11px;display:block}
+    .wl{display:block;font-size:11px;color:var(--text-muted);margin-top:2px;white-space:nowrap}
+    .li .wl{grid-column:1/-1;text-align:right;margin-top:-7px;white-space:normal}
+    .cmp .wl .w2{display:block}
+    .cmp .wl .ws{display:none}
+    .vd{display:inline-block;font-size:11px;font-weight:600;margin-top:2px;white-space:nowrap}
+    .vd.hold{color:var(--green)} .vd.weak{color:var(--yellow)} .vd.gone{color:var(--red)}
+    .tag.gone{opacity:.5;text-decoration:line-through}
     .seg{display:inline-flex;gap:4px}
-    .sg{min-width:64px;border-radius:8px;padding:5px 8px;background:var(--bg3);border:1px solid transparent;text-align:center;line-height:1.3}
+    .sg{min-width:62px;border-radius:8px;padding:5px 8px;background:var(--bg3);border:1px solid transparent;text-align:center;line-height:1.3}
     .sg .sl{display:block;font-size:11px;color:var(--text-muted)}
     .sg .sv{display:block;font-size:13px;font-weight:600;color:var(--text-muted)}
     .sg .sa{display:block;font-size:11px;color:var(--text-muted)}
@@ -133,8 +140,16 @@
     .foot{color:var(--text-dim);font-size:11px;line-height:1.5}
     .skeleton{color:var(--text-muted);font-size:13px;padding:16px}
     .cmp .bar{display:none}
-    .cmp th,.cmp td{padding:9px 9px}
-    @media (max-width:1120px){
+    .cmp th,.cmp td{padding:9px 7px}
+    .cmp th:first-child,.cmp td:first-child{padding-left:12px}
+    .cmp th:last-child,.cmp td:last-child{padding-right:12px}
+    .cmp th{white-space:normal;vertical-align:bottom;line-height:1.3}
+    .cmp td.bcell{white-space:normal}
+    .cmp td.bcell .lv{margin-left:0;margin-top:3px}
+    .cmp td.bcell .bias{display:flex}
+    .cmp .inst{white-space:normal;min-width:84px}
+    .cmp .inst b{white-space:nowrap}
+    @media (max-width:1151px){
       .mob-only{display:block}
       .cmp thead{display:none}
       .cmp,.cmp tbody{display:block}
@@ -142,6 +157,7 @@
       .cmp tr:last-child{border-bottom:0}
       .cmp td{display:block;padding:0;border:0!important;text-align:left!important;white-space:normal}
       .cmp td.nw{white-space:normal}
+      .wl{white-space:normal}
       .cmp td.inst{grid-column:1}
       .cmp td.bcell{grid-column:2;text-align:right!important;align-self:center}
       .cmp td.ycell,.cmp td.pcell{grid-column:1/-1}
@@ -273,16 +289,17 @@ const L = {
     active:'Больше всего движения', activeH:'Типичный ход: средний размер движения за месяц от закрытия до закрытия, без учёта направления (не High–Low). ×1.3 значит в этом месяце инструмент ходит на 30% больше, чем в свой обычный месяц.',
     usual:'обычно',
     noLongs:'В этом месяце нет инструментов с устойчивым ростом.', noShorts:'В этом месяце нет инструментов с устойчивым падением.',
-    cmp:m=>`${m}: перевес, история и последние два года`, cmpH:'Перевес показывает, что чаще было в прошлом, а не прогноз. Средний рост и среднее падение показывают, насколько большие месяцы в плюс и в минус: перевес по годам мало стоит, если падения в разы больше ростов. «Внутри месяца» показывает, как обычно шли 1–10, 11–20 число и с 21-го до конца месяца (в феврале до 28/29, в 30-дневных месяцах до 30): подсвечены части с повторяемостью 14+ из 20.',
+    cmp:m=>`${m}: перевес, история и последние два года`, cmpH:'Перевес показывает, что чаще было в прошлом, это не прогноз. Под числом лет: тот же месяц за последние 10 лет и за всю историю («пропала» значит, что в последние 10 лет перевеса уже нет). «Внутри месяца»: как обычно шли 1–10, 11–20 число и остаток месяца. Ср. рост и ср. падение: насколько большие месяцы в плюс и в минус.',
     onlyEdge:'С перевесом', all:'Все',
     groups:{all:'Все',metals:'Металлы',oil:'Нефть',indices:'Индексы',fx:'Валюты',crosses:'Кроссы'},
+    w10:'10 лет', wSince:y=>`с ${y}`, vd:{hold:'✓ держится', weak:'~ ослабла', gone:'✗ пропала'}, tW10:'Последние 10 лет', tWmax:y=>`Вся история с ${y}`,
     colParts:'Внутри месяца',
     colInst:'Инструмент', colBias:'Исторический перевес', colYears:'Сколько лет', colAvg:'Средний · медиана', colWL:'Ср. рост · ср. падение',
     biasUp:'чаще рост', biasDn:'чаще падение', biasNone:'нет перевеса',
     conflict:'средний и большинство лет спорят',
     inProgress:'идёт', ahead:'впереди', noData:'нет данных', hit:'совпало', miss:'против',
     noEdgeRows:'В этом месяце нет инструментов с перевесом в выбранной группе.',
-    plan:'План на 12 месяцев вперёд', planH:'Что исторически чаще росло и падало в каждом из ближайших месяцев. ↑16/20 значит рос 16 лет из 20. Жирные: высокая повторяемость. Нажми на строку, чтобы открыть месяц.',
+    plan:'План на 12 месяцев вперёд', planH:'Что исторически чаще росло и падало в каждом из ближайших месяцев. ↑16/20 значит рос 16 лет из 20. Жирные: высокая повторяемость. Зачёркнутые: за последние 10 лет перевес пропал. Нажми на строку, чтобы открыть месяц.',
     colMonth:'Месяц', colL:'Чаще росли', colS:'Чаще падали', noneSteady:'нет устойчивых', curMonth:'текущий месяц',
     heat:'Все инструменты по месяцам', heatH:'Сверху средний ход за месяц в %, снизу сколько лет из 20 был рост (↑16/20) или падение (↓14/20). Наведи на клетку, чтобы увидеть медиану и средний рост и падение. Нажми на месяц в шапке или на клетку, чтобы выбрать месяц.',
     swipe:'Таблицу можно листать вбок →. Нажми на клетку, чтобы увидеть подробности.',
@@ -296,6 +313,7 @@ const L = {
       'Ход месяца: от закрытия прошлого месяца до закрытия этого. Для каждого месяца считаются средний ход, медиана (серединное значение, на неё не влияют единичные выбросы), сколько лет был рост, средний рост в плюсовые годы и среднее падение в минусовые.',
       'Перевес есть, только если всё указывает в одну сторону: 13+ лет из 20 в одну сторону, и средний ход, и медиана в ту же сторону. Если средний ход в плюсе, а большинство лет в минусе (пара огромных лет вытянула среднее), перевеса нет, клетка серая с «!».',
       'Историческая повторяемость: высокая 16+ лет из 20, средняя 14–15, низкая 13. Это частота в прошлом, а не вероятность: 16 из 20 не значит 80% шанс роста в этом году. Низкая повторяемость часто случайна (инструментов и месяцев сотни, и 13 из 20 само по себе выпадает примерно в 13% клеток), поэтому такие клетки не подсвечиваются цветом. Если истории меньше 20 лет (Brent с 2007, Euro Stoxx 50, платина), пороги те же в долях: 65%, 70% и 80% лет, например 13 из 18.',
+      'Устойчивость: рядом с 20-летней статистикой показан тот же месяц за последние 10 лет и за всю историю, которая есть у Yahoo (до 40 лет: индексы с 1986, валюты примерно с 2004, золото и нефть с 2001, Brent с 2008). Если перевес есть за 20 лет, но в последние 10 лет его нет (4 из 10 и меньше), он помечен «пропала» («держится»: 6+ из 10, «ослабла»: 5 из 10): рынок изменился, и на такой перевес лучше не опираться. Если совпадают все три периода, закономерность самая надёжная.',
       'Внутри месяца: каждый месяц делится на три части: с 1 по 10 число (от закрытия прошлого месяца), с 11 по 20 и с 21 до закрытия месяца. Для каждой части считается то же: сколько лет был рост, средний ход и медиана. Чем короче отрезок, тем больше шума, поэтому цветом выделяются только части с повторяемостью 14+ из 20.',
       'Смотри на средний рост и среднее падение: «рос 16 из 20 лет» плохо, если средний рост +2%, а среднее падение −5%.',
       'Данные: месячные закрытия Yahoo Finance. Металлы и нефть это ближайшие фьючерсы (GC, SI, PL, CL, BZ), при смене контракта отдельные месяцы могут сдвигаться на 1–2% относительно CFD. Индексы кассовые, валюты спот. Сервер обновляет данные раз в 12 часов; если источник недоступен, берётся резервная копия. В резервной копии валюты и золото посчитаны по средней цене месяца, поэтому её цифры немного отличаются от живых.',
@@ -323,16 +341,17 @@ const L = {
     active:'Найбільше руху', activeH:'Типовий хід: середній розмір руху за місяць від закриття до закриття, без урахування напрямку (не High–Low). ×1.3 означає, що в цьому місяці інструмент ходить на 30% більше, ніж у свій звичайний місяць.',
     usual:'зазвичай',
     noLongs:'У цьому місяці немає інструментів зі стійким зростанням.', noShorts:'У цьому місяці немає інструментів зі стійким падінням.',
-    cmp:m=>`${m}: перевага, історія та останні два роки`, cmpH:'Перевага показує, що частіше було в минулому, а не прогноз. Середнє зростання й середнє падіння показують, наскільки великі місяці в плюс і в мінус: перевага за роками мало варта, якщо падіння в рази більші за зростання. «Усередині місяця» показує, як зазвичай ішли 1–10, 11–20 число і з 21-го до кінця місяця (у лютому до 28/29, у 30-денних місяцях до 30): підсвічені частини з повторюваністю 14+ із 20.',
+    cmp:m=>`${m}: перевага, історія та останні два роки`, cmpH:'Перевага показує, що частіше було в минулому, це не прогноз. Під кількістю років: той самий місяць за останні 10 років і за всю історію («зникла» означає, що за останні 10 років переваги вже немає). «Усередині місяця»: як зазвичай ішли 1–10, 11–20 число і решта місяця. Сер. зростання і сер. падіння: наскільки великі місяці в плюс і в мінус.',
     onlyEdge:'З перевагою', all:'Усі',
     groups:{all:'Усі',metals:'Метали',oil:'Нафта',indices:'Індекси',fx:'Валюти',crosses:'Кроси'},
+    w10:'10 років', wSince:y=>`з ${y}`, vd:{hold:'✓ тримається', weak:'~ ослабла', gone:'✗ зникла'}, tW10:'Останні 10 років', tWmax:y=>`Уся історія з ${y}`,
     colParts:'Усередині місяця',
     colInst:'Інструмент', colBias:'Історична перевага', colYears:'Скільки років', colAvg:'Середній · медіана', colWL:'Сер. зростання · сер. падіння',
     biasUp:'частіше зростання', biasDn:'частіше падіння', biasNone:'немає переваги',
     conflict:'середній і більшість років сперечаються',
     inProgress:'триває', ahead:'попереду', noData:'немає даних', hit:'збіглося', miss:'проти',
     noEdgeRows:'У цьому місяці немає інструментів з перевагою у вибраній групі.',
-    plan:'План на 12 місяців уперед', planH:'Що історично частіше зростало й падало в кожному з найближчих місяців. ↑16/20 означає зростав 16 років із 20. Жирні: висока повторюваність. Натисни на рядок, щоб відкрити місяць.',
+    plan:'План на 12 місяців уперед', planH:'Що історично частіше зростало й падало в кожному з найближчих місяців. ↑16/20 означає зростав 16 років із 20. Жирні: висока повторюваність. Закреслені: за останні 10 років перевага зникла. Натисни на рядок, щоб відкрити місяць.',
     colMonth:'Місяць', colL:'Частіше зростали', colS:'Частіше падали', noneSteady:'немає стійких', curMonth:'поточний місяць',
     heat:'Усі інструменти за місяцями', heatH:'Зверху середній хід за місяць у %, знизу скільки років із 20 було зростання (↑16/20) або падіння (↓14/20). Наведи на клітинку, щоб побачити медіану та середнє зростання й падіння. Натисни на місяць у шапці або на клітинку, щоб вибрати місяць.',
     swipe:'Таблицю можна гортати вбік →. Натисни на клітинку, щоб побачити деталі.',
@@ -346,6 +365,7 @@ const L = {
       'Хід місяця: від закриття минулого місяця до закриття цього. Для кожного місяця рахуються середній хід, медіана (серединне значення, на неї не впливають поодинокі викиди), скільки років було зростання, середнє зростання в плюсові роки та середнє падіння в мінусові.',
       'Перевага є, лише якщо все вказує в один бік: 13+ років із 20 в один бік, і середній хід, і медіана в той самий бік. Якщо середній хід у плюсі, а більшість років у мінусі (пара величезних років витягла середнє), переваги немає, клітинка сіра з «!».',
       'Історична повторюваність: висока 16+ років із 20, середня 14–15, низька 13. Це частота в минулому, а не ймовірність: 16 із 20 не означає 80% шансу зростання цього року. Низька повторюваність часто випадкова (інструментів і місяців сотні, і 13 із 20 саме по собі випадає приблизно в 13% клітинок), тому такі клітинки не підсвічуються кольором. Якщо історії менше 20 років (Brent з 2007, Euro Stoxx 50, платина), пороги ті самі в частках: 65%, 70% і 80% років, наприклад 13 із 18.',
+      'Стійкість: поруч із 20-річною статистикою показано той самий місяць за останні 10 років і за всю історію, яка є в Yahoo (до 40 років: індекси з 1986, валюти приблизно з 2004, золото й нафта з 2001, Brent з 2008). Якщо перевага є за 20 років, але за останні 10 років її немає (4 із 10 і менше), вона позначена «зникла» («тримається»: 6+ із 10, «ослабла»: 5 із 10): ринок змінився, і на таку перевагу краще не спиратися. Якщо збігаються всі три періоди, закономірність найнадійніша.',
       'Усередині місяця: кожен місяць ділиться на три частини: з 1 по 10 число (від закриття минулого місяця), з 11 по 20 і з 21 до закриття місяця. Для кожної частини рахується те саме: скільки років було зростання, середній хід і медіана. Чим коротший відрізок, тим більше шуму, тому кольором виділяються лише частини з повторюваністю 14+ із 20.',
       'Дивись на середнє зростання й середнє падіння: «зростав 16 із 20 років» погано, якщо середнє зростання +2%, а середнє падіння −5%.',
       'Дані: місячні закриття Yahoo Finance. Метали й нафта це найближчі ф’ючерси (GC, SI, PL, CL, BZ), при зміні контракту окремі місяці можуть зсуватися на 1–2% відносно CFD. Індекси касові, валюти спот. Сервер оновлює дані раз на 12 годин; якщо джерело недоступне, береться резервна копія. У резервній копії валюти й золото пораховані за середньою ціною місяця, тому її цифри трохи відрізняються від живих.',
@@ -373,16 +393,17 @@ const L = {
     active:'Most movement', activeH:'Typical move: average size of the monthly close-to-close move regardless of direction (not High–Low). ×1.3 means the instrument moves 30% more this month than in its usual month.',
     usual:'usually',
     noLongs:'No instrument has a steady rise this month.', noShorts:'No instrument has a steady fall this month.',
-    cmp:m=>`${m}: edge, history and the last two years`, cmpH:'The edge shows what happened more often in the past, not a forecast. Average gain and average loss show how big the up and down months are: a count edge is worth little if losses are several times bigger than gains. "Within the month" shows how days 1–10, 11–20 and 21 to month end (28/29 in February, 30 in 30-day months) usually went: parts that repeated 14+ of 20 years are highlighted.',
+    cmp:m=>`${m}: edge, history and the last two years`, cmpH:'The edge shows what happened more often in the past; it is not a forecast. Under the year count: the same month over the last 10 years and the full history ("gone" means the edge is no longer there in the last 10 years). "Within the month": how days 1–10, 11–20 and the rest of the month usually went. Avg gain and avg loss: how big the up and down months are.',
     onlyEdge:'With an edge', all:'All',
     groups:{all:'All',metals:'Metals',oil:'Oil',indices:'Indices',fx:'FX',crosses:'Crosses'},
+    w10:'10 yrs', wSince:y=>`since ${y}`, vd:{hold:'✓ holding', weak:'~ weaker', gone:'✗ gone'}, tW10:'Last 10 years', tWmax:y=>`Full history since ${y}`,
     colParts:'Within the month',
     colInst:'Instrument', colBias:'Historical edge', colYears:'Years', colAvg:'Average · median', colWL:'Avg gain · avg loss',
     biasUp:'mostly up', biasDn:'mostly down', biasNone:'no edge',
     conflict:'average and most years disagree',
     inProgress:'in progress', ahead:'ahead', noData:'no data', hit:'matched', miss:'against',
     noEdgeRows:'No instruments with an edge in the selected group this month.',
-    plan:'12-month plan', planH:'What historically rose and fell more often in each of the coming months. ↑16/20 means up 16 of 20 years. Bold: high repeatability. Tap a row to open that month.',
+    plan:'12-month plan', planH:'What historically rose and fell more often in each of the coming months. ↑16/20 means up 16 of 20 years. Bold: high repeatability. Struck through: the edge is gone in the last 10 years. Tap a row to open that month.',
     colMonth:'Month', colL:'Rose more often', colS:'Fell more often', noneSteady:'none steady', curMonth:'current month',
     heat:'All instruments by month', heatH:'Top: average monthly move in %, bottom: how many of 20 years it rose (↑16/20) or fell (↓14/20). Hover a cell for the median and average gain and loss. Tap a month in the header or a cell to select it.',
     swipe:'Swipe the table sideways →. Tap a cell for details.',
@@ -396,6 +417,7 @@ const L = {
       'Monthly move: from the previous month close to this month close. For each month: average move, median (the middle value, not affected by single outliers), number of up years, average gain in up years and average loss in down years.',
       'There is an edge only when everything points one way: 13+ of 20 years in one direction, and both the average and the median in that direction. If the average is positive but most years are negative (a couple of huge years pulled the average), there is no edge and the cell is grey with "!".',
       'Historical repeatability: high 16+ of 20 years, medium 14–15, low 13. This is a past frequency, not a probability: 16 of 20 does not mean an 80% chance of a rise this year. Low repeatability is often chance (there are hundreds of instrument-month cells, and 13 of 20 alone shows up in about 13% of them), so those cells are not coloured. Where history is shorter than 20 years (Brent from 2007, Euro Stoxx 50, platinum), the same thresholds apply as shares: 65%, 70% and 80% of years, e.g. 13 of 18.',
+      'Stability: next to the 20-year statistics you see the same month over the last 10 years and over the full history Yahoo has (up to 40 years: indices since 1986, FX since about 2004, gold and oil since 2001, Brent since 2008). If there is a 20-year edge but not in the last 10 years (4 of 10 or fewer), it is marked "gone" ("holding": 6+ of 10, "weaker": 5 of 10): the market changed and that edge should not be relied on. When all three periods agree, the pattern is the most reliable.',
       'Within the month: each month is split into three parts: days 1–10 (from the previous month close), 11–20 and 21 to the month close. Each part gets the same statistics: up years, average and median. Shorter periods are noisier, so only parts with 14+ of 20 repeatability are coloured.',
       'Check average gain against average loss: "up 16 of 20 years" is bad if the average gain is +2% and the average loss is −5%.',
       'Data: Yahoo Finance monthly closes. Metals and oil are front-month futures (GC, SI, PL, CL, BZ); on contract rolls single months can differ from CFDs by 1–2%. Indices are cash, FX is spot. The server refreshes every 12 hours; if the source is down a backup copy is used. In the backup, FX and gold were computed from average monthly prices, so its numbers differ slightly from the live ones.',
@@ -456,8 +478,24 @@ function segBox(s, label){
 // подписи частей с реальным числом дней в месяце: февраль 28/29, апрель/июнь/сентябрь/ноябрь 30
 function partLabels(m){ const last = m === 2 ? '28/29' : String(new Date(2001, m, 0).getDate()); return ['1–10', '11–20', '21–' + last]; }
 function segRow(id, m){ const p = DATA && DATA.parts && DATA.parts[id]; if (!p) return null; const w = el('span','seg'); const lb = partLabels(m); p[m-1].forEach((s, j) => w.append(segBox(s, lb[j]))); return w; }
+function winOf(id, m){ const w = DATA && DATA.win && DATA.win[id]; return w ? w[m-1] : null; }
+const wFmt = (u, n) => (u * 2 >= n ? '↑' + u : '↓' + (n - u)) + '/' + n;
+// устойчивость 20-летнего перевеса в последние 10 лет: hold 6+/10, weak 5/10, gone 4-/10
+function stab(id, m){
+  const w = winOf(id, m), a = an(st(id, m));
+  if (!w || !a.level || !w.n10) return null;
+  const sh = (a.sign > 0 ? w.u10 : w.n10 - w.u10) / w.n10;
+  return sh >= 0.6 ? 'hold' : sh >= 0.5 ? 'weak' : 'gone';
+}
+function winLine(id, m){
+  const w = winOf(id, m), s = st(id, m), t = T(); if (!w || !w.n10) return null;
+  const box = el('span','wl'); box.append(el('span','w1', t.w10 + ': ' + wFmt(w.u10, w.n10)));
+  if (s && w.nM >= s.n + 3) box.append(el('span','ws',' · '), el('span','w2', t.wSince(w.yM) + ': ' + wFmt(w.uM, w.nM)));
+  return box;
+}
+function vdBadge(id, m){ const v = stab(id, m); return v ? el('span','vd ' + v, T().vd[v]) : null; }
 function lvBadge(level, dir){ const b = el('span', 'lv l' + level + (dir > 0 ? ' up' : ' dn'), T().lvl[level]); return b; }
-function rank(a, b, m){ const A = an(st(a.id, m)), B = an(st(b.id, m)); return (B.level - A.level) || (B.k - A.k) || (Math.abs(st(b.id, m).med) - Math.abs(st(a.id, m).med)); }
+function rank(a, b, m){ const A = an(st(a.id, m)), B = an(st(b.id, m)); const ga = stab(a.id, m) === 'gone' ? 1 : 0, gb = stab(b.id, m) === 'gone' ? 1 : 0; return (ga - gb) || (B.level - A.level) || (B.k - A.k) || (Math.abs(st(b.id, m).med) - Math.abs(st(a.id, m).med)); }
 function longsFor(m){ return avail().filter((i) => an(st(i.id,m)).sign === 1).sort((a,b) => rank(a,b,m)); }
 function shortsFor(m){ return avail().filter((i) => an(st(i.id,m)).sign === -1).sort((a,b) => rank(a,b,m)); }
 function yearsN(){ return DATA ? DATA.period[1] - DATA.period[0] + 1 : 20; }
@@ -519,7 +557,9 @@ function item(i, m){
   const s = st(i.id, m), a = an(s), li = el('li','li');
   const left = el('span'); const nm = el('span','s', i.id); left.append(nm, lvBadge(a.level, a.dir)); if (nameOf(i)) left.append(el('span','n', nameOf(i)));
   const right = el('span','r'); right.append(el('span','v ' + (s.avg >= 0 ? 'up' : 'dn'), fmt(s.avg) + '%'), el('span','u', dirTxt(s)));
-  li.append(left, right); return li;
+  const wl = winLine(i.id, m), vb = vdBadge(i.id, m); li.append(left, right);
+  if (wl) { if (vb) { wl.append(' '); vb.style.marginTop = '0'; wl.append(vb); } li.append(wl); }
+  return li;
 }
 function renderCards(){
   const t = T();
@@ -573,7 +613,9 @@ function renderCompare(){
     else { tbias.append(el('span','muted', '— ' + t.biasNone)); if (a.conflict) tbias.append(el('span','warn-txt', '! ' + t.conflict)); }
     tr.append(tbias);
     const ty = el('td','nw ycell'); ty.dataset.label = t.colYears; ty.append(document.createTextNode(dirTxt(s)));
-    const bar = el('span','bar'); const fi = el('i'); fi.style.width = (a.k / a.n * 100) + '%'; fi.style.background = a.dir >= 0 ? 'var(--green)' : 'var(--red)'; bar.append(fi); ty.append(bar); tr.append(ty);
+    const bar = el('span','bar'); const fi = el('i'); fi.style.width = (a.k / a.n * 100) + '%'; fi.style.background = a.dir >= 0 ? 'var(--green)' : 'var(--red)'; bar.append(fi); ty.append(bar);
+    { const wl = winLine(i.id, SEL), vb = vdBadge(i.id, SEL); if (wl) ty.append(wl); if (vb) ty.append(vb); }
+    tr.append(ty);
     if (hasParts) { const tp = el('td','pcell'); tp.dataset.label = t.colParts; const sr = segRow(i.id, SEL); tp.append(sr || el('span','muted','—')); tr.append(tp); }
     const tav = el('td','num'); tav.dataset.label = t.colAvg; tav.append(el('span', s.avg >= 0 ? 'up' : 'dn', fmt(s.avg) + '%'), el('span','match', fmt(s.med) + '%')); tr.append(tav);
     const twl = el('td','num'); twl.dataset.label = t.colWL; twl.append(el('span','up', s.avgUp != null ? fmt(s.avgUp) + '%' : '—'), el('span','muted', ' · '), el('span','dn', s.avgDn != null ? fmt(s.avgDn) + '%' : '—')); tr.append(twl);
@@ -598,7 +640,7 @@ function renderPlan(){
     const m = ((NOW_M - 1 + k) % 12) + 1, y = NOW_Y + Math.floor((NOW_M - 1 + k) / 12);
     const tr = body.insertRow(); tr.className = 'pr' + (m === SEL ? ' sel' : '');
     const tm = el('td','mo', t.mFull[m-1] + ' ' + y); if (k === 0) tm.append(el('span', null, t.curMonth)); tr.append(tm);
-    const cell = (list, cls) => { const td = el('td'); td.dataset.label = cls === 'l' ? t.colL : t.colS; if (!list.length) td.append(el('span','muted', t.noneSteady)); list.forEach((i) => { const s = st(i.id, m); td.append(el('span','tag ' + cls + ' t' + an(s).level, i.id + ' ' + dirShort(s))); }); return td; };
+    const cell = (list, cls) => { const td = el('td'); td.dataset.label = cls === 'l' ? t.colL : t.colS; if (!list.length) td.append(el('span','muted', t.noneSteady)); list.forEach((i) => { const s = st(i.id, m); td.append(el('span','tag ' + cls + ' t' + an(s).level + (stab(i.id, m) === 'gone' ? ' gone' : ''), i.id + ' ' + dirShort(s))); }); return td; };
     tr.append(cell(longsFor(m), 'l'), cell(shortsFor(m), 's'));
     tr.onclick = () => { selectMonth(m); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   }
@@ -631,7 +673,9 @@ function renderHeat(){
         const act = DATA.actual[i.id] || {};
         const lines = [el('b', null, i.id + ' · ' + t.mFull[k])];
         const bias = el('div'); if (a.level) { bias.append(el('span', a.sign > 0 ? 'up' : 'dn', a.sign > 0 ? '↑ ' + t.biasUp : '↓ ' + t.biasDn), lvBadge(a.level, a.sign)); } else bias.append(el('span','muted', t.biasNone)); lines.push(bias);
-        lines.push(el('div', null, dirTxt(s)), el('hr'));
+        lines.push(el('div', null, dirTxt(s)));
+        { const w = winOf(i.id, k+1); if (w && w.n10) { lines.push(el('div', null, `${t.tW10}: ${wFmt(w.u10, w.n10)}`)); if (w.nM >= s.n + 3) lines.push(el('div', null, `${t.tWmax(w.yM)}: ${wFmt(w.uM, w.nM)}`)); const vb = vdBadge(i.id, k+1); if (vb) lines.push(vb); } }
+        lines.push(el('hr'));
         lines.push(el('div', null, `${t.tAvg}: ${fmt(s.avg)}%`), el('div', null, `${t.tMed}: ${fmt(s.med)}%`));
         if (s.avgUp != null || s.avgDn != null) lines.push(el('div', null, `${t.tWin}: ${fmt(s.avgUp)}%`), el('div', null, `${t.tLoss}: ${fmt(s.avgDn)}%`));
         lines.push(el('div', null, `${t.tAbs}: ±${s.abs.toFixed(1)}%`));
