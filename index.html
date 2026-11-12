@@ -9,7 +9,7 @@
   <meta property="og:description" content="20-year monthly seasonality for gold, silver, oil, indices and FX pairs.">
   <meta property="og:type" content="website">
   <meta name="theme-color" content="#0f0f0f">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230f0f0f'/><rect x='5' y='16' width='6' height='11' rx='1.5' fill='%234ade80'/><rect x='13' y='10' width='6' height='17' rx='1.5' fill='%23f87171'/><rect x='21' y='5' width='6' height='22' rx='1.5' fill='%234ade80'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230f0f0f'/><rect x='5' y='16' width='6' height='11' rx='1.5' fill='%234ade80'/><rect x='13' y='10' width='6' height='17' rx='1.5' fill='%23f87171'/><rect x='21' y='5' width='6' height='22' rx='1.5' fill='%234ade80'/></svg>">
   <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
@@ -30,7 +30,9 @@
     .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;padding:3px 10px;background:var(--bg2)}
     .dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
     .dot.warn{background:var(--yellow)}
-    .months{display:grid;grid-template-columns:repeat(12,1fr);gap:6px}
+    .months{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;position:sticky;top:0;z-index:20;background:var(--bg);padding:8px 0;margin:-8px 0;scrollbar-width:none}
+    .months::-webkit-scrollbar{display:none}
+    .mob-only{display:none}
     .m-btn{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 2px;color:var(--text-muted);font-size:13px;cursor:pointer;text-align:center;position:relative;transition:all .15s;user-select:none}
     .m-btn:hover{border-color:var(--border-active);color:var(--text)}
     .m-btn.active{background:var(--bg3);border-color:var(--border-active);color:var(--text);font-weight:600}
@@ -95,7 +97,8 @@
     .heat thead th.mh.now span{display:block;font-size:9px;color:var(--accent)}
     .heat th.row{text-align:left;position:sticky;left:0;background:var(--bg2);z-index:1;color:var(--text);min-width:118px}
     .heat th.row span{display:block;color:var(--text-muted);font-size:10px;font-weight:400}
-    .heat tr.grp th{text-align:left;color:var(--text-muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding-top:12px;position:sticky;left:0;background:var(--bg2)}
+    .heat tr.grp th{text-align:left;color:var(--text-muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding-top:12px}
+    .heat tr.grp .gl{position:sticky;left:6px}
     .heat td{min-width:56px;text-align:center;border-radius:6px;padding:5px 3px;cursor:pointer;transition:transform .1s;background:var(--neutral);position:relative}
     .heat td:hover{transform:scale(1.05)}
     .heat td .a{display:block;font-weight:500}
@@ -114,11 +117,43 @@
     details ul{margin:10px 0 2px 18px;display:flex;flex-direction:column;gap:6px;color:var(--text-muted);font-size:13px;line-height:1.55;max-width:84ch}
     .foot{color:var(--text-dim);font-size:11px;line-height:1.5}
     .skeleton{color:var(--text-muted);font-size:13px;padding:16px}
+    @media (max-width:860px){
+      .mob-only{display:block}
+      .cmp thead{display:none}
+      .cmp,.cmp tbody{display:block}
+      .cmp tr{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;padding:12px 14px;border-bottom:1px solid var(--border)}
+      .cmp tr:last-child{border-bottom:0}
+      .cmp td{display:block;padding:0;border:0!important;text-align:left!important;white-space:normal}
+      .cmp td.nw{white-space:normal}
+      .cmp td.inst{grid-column:1}
+      .cmp td.bcell{grid-column:2;text-align:right!important;align-self:center}
+      .cmp td.ycell{grid-column:1/-1}
+      .cmp td.empty{grid-column:1/-1}
+      .cmp .match{margin-left:6px}
+      .cmp td[data-label]::before,.plan td[data-label]::before{content:attr(data-label);display:block;font-size:11px;color:var(--text-muted);margin-bottom:3px;font-weight:400}
+      .cmp .bias{display:block}
+      .cmp .lv{margin-left:0;margin-top:4px}
+    }
     @media (max-width:720px){
-      .months{grid-template-columns:repeat(6,1fr)}
+      body{padding:14px 12px 32px}
+      .wrap{gap:20px}
+      .months{display:flex;overflow-x:auto;gap:6px}
+      .m-btn{flex:0 0 auto;min-width:58px;padding:8px 6px}
       .lede{font-size:15px}
       h1{font-size:19px}
       .bar{display:none}
+      .cards{grid-template-columns:1fr}
+      .plan thead{display:none}
+      .plan,.plan tbody{display:block}
+      .plan tr{display:block;padding:12px 14px;border-bottom:1px solid var(--border)}
+      .plan tr:last-child{border-bottom:0}
+      .plan td{display:block;padding:0;border:0!important}
+      .plan td.mo{margin-bottom:8px}
+      .plan td.mo span{display:inline;margin-left:8px}
+      .plan td + td{margin-top:6px}
+      .plan tr.pr.sel,.plan tr.pr:hover{background:var(--bg3)}
+      .plan tr.pr td{background:transparent!important}
+      .tip{max-width:230px;min-width:190px}
     }
     @media (prefers-reduced-motion:reduce){*{transition:none!important}}
   </style>
@@ -164,6 +199,7 @@
   <section class="sec" id="heat-sec">
     <div><h2 id="t-heat"></h2><p class="hint" id="t-heat-h"></p></div>
     <div class="legend" id="legend"></div>
+    <p class="hint mob-only" id="t-swipe"></p>
     <div class="scroll heat-box" id="heat-box"><div class="skeleton">…</div></div>
   </section>
 
@@ -206,6 +242,9 @@ const L = {
     stats:(a,b)=>`Статистика ${a}–${b}`, updated:d=>`обновлено ${d}`,
     live:'данные Yahoo Finance, обновляются автоматически', fallback:'резервная копия данных', failed:n=>`${n} инстр. из резервной копии`,
     lede:(n)=>[`В `,`за ${n} лет чаще всего рос `,`, а чаще всего падал `,`.`],
+    ledeNoDn:(n)=>[`В `,`за ${n} лет чаще всего рос `,`, а устойчиво падающих инструментов не было.`],
+    ledeNoUp:(n)=>[`В `,`за ${n} лет устойчиво растущих инструментов не было, а чаще всего падал `,`.`],
+    ledeNone:(n)=>[`В `,`за ${n} лет не было ни устойчиво растущих, ни устойчиво падающих инструментов.`],
     none:'ни один инструмент',
     ofN:(c,n)=>`${c} из ${n} лет`, rose:(c,n)=>`рос ${c} из ${n} лет`, fell:(c,n)=>`падал ${c} из ${n} лет`,
     lvl:['нет перевеса','низкая','средняя','высокая'],
@@ -226,6 +265,7 @@ const L = {
     plan:'План на 12 месяцев вперёд', planH:'Что исторически чаще росло и падало в каждом из ближайших месяцев. ↑16/20 значит рос 16 лет из 20. Жирные: высокая повторяемость. Нажми на строку, чтобы открыть месяц.',
     colMonth:'Месяц', colL:'Чаще росли', colS:'Чаще падали', noneSteady:'нет устойчивых', curMonth:'текущий месяц',
     heat:'Все инструменты по месяцам', heatH:'Сверху средний ход за месяц в %, снизу сколько лет из 20 был рост (↑16/20) или падение (↓14/20). Наведи на клетку, чтобы увидеть медиану и средний рост и падение. Нажми на месяц в шапке или на клетку, чтобы выбрать месяц.',
+    swipe:'Таблицу можно листать вбок →. Нажми на клетку, чтобы увидеть подробности.',
     lgUp:'чаще рост', lgDn:'чаще падение', lgBright:'чем ярче, тем чаще повторялось', lgFlat:'серая: перевеса нет или повторяемость низкая', lgCf:'! средний ход и большинство лет в разные стороны',
     tAvg:'Средний ход', tMed:'Медиана', tWin:'Средний рост', tLoss:'Среднее падение', tAbs:'Типичный ход',
     tCf:'Средний ход вытянули несколько сильных лет, большинство лет в другую сторону. Перевеса нет.',
@@ -250,6 +290,9 @@ const L = {
     stats:(a,b)=>`Статистика ${a}–${b}`, updated:d=>`оновлено ${d}`,
     live:'дані Yahoo Finance, оновлюються автоматично', fallback:'резервна копія даних', failed:n=>`${n} інстр. з резервної копії`,
     lede:(n)=>[`У `,`за ${n} років найчастіше зростав `,`, а найчастіше падав `,`.`],
+    ledeNoDn:(n)=>[`У `,`за ${n} років найчастіше зростав `,`, а стійко спадних інструментів не було.`],
+    ledeNoUp:(n)=>[`У `,`за ${n} років стійко зростаючих інструментів не було, а найчастіше падав `,`.`],
+    ledeNone:(n)=>[`У `,`за ${n} років не було ні стійко зростаючих, ні стійко спадних інструментів.`],
     none:'жоден інструмент',
     ofN:(c,n)=>`${c} з ${n} років`, rose:(c,n)=>`зростав ${c} з ${n} років`, fell:(c,n)=>`падав ${c} з ${n} років`,
     lvl:['немає переваги','низька','середня','висока'],
@@ -270,6 +313,7 @@ const L = {
     plan:'План на 12 місяців уперед', planH:'Що історично частіше зростало й падало в кожному з найближчих місяців. ↑16/20 означає зростав 16 років із 20. Жирні: висока повторюваність. Натисни на рядок, щоб відкрити місяць.',
     colMonth:'Місяць', colL:'Частіше зростали', colS:'Частіше падали', noneSteady:'немає стійких', curMonth:'поточний місяць',
     heat:'Усі інструменти за місяцями', heatH:'Зверху середній хід за місяць у %, знизу скільки років із 20 було зростання (↑16/20) або падіння (↓14/20). Наведи на клітинку, щоб побачити медіану та середнє зростання й падіння. Натисни на місяць у шапці або на клітинку, щоб вибрати місяць.',
+    swipe:'Таблицю можна гортати вбік →. Натисни на клітинку, щоб побачити деталі.',
     lgUp:'частіше зростання', lgDn:'частіше падіння', lgBright:'що яскравіше, то частіше повторювалося', lgFlat:'сіра: переваги немає або повторюваність низька', lgCf:'! середній хід і більшість років у різні боки',
     tAvg:'Середній хід', tMed:'Медіана', tWin:'Середнє зростання', tLoss:'Середнє падіння', tAbs:'Типовий хід',
     tCf:'Середній хід витягли кілька сильних років, більшість років в інший бік. Переваги немає.',
@@ -294,6 +338,9 @@ const L = {
     stats:(a,b)=>`Statistics ${a}–${b}`, updated:d=>`updated ${d}`,
     live:'Yahoo Finance data, updated automatically', fallback:'backup copy of the data', failed:n=>`${n} instr. from backup`,
     lede:(n)=>[`In `,`, over ${n} years, the most consistent riser was `,`, and the most consistent faller was `,`.`],
+    ledeNoDn:(n)=>[`In `,`, over ${n} years, the most consistent riser was `,`, and no instrument fell consistently.`],
+    ledeNoUp:(n)=>[`In `,`, over ${n} years, no instrument rose consistently, and the most consistent faller was `,`.`],
+    ledeNone:(n)=>[`In `,`, over ${n} years, no instrument rose or fell consistently.`],
     none:'no instrument',
     ofN:(c,n)=>`${c} of ${n} years`, rose:(c,n)=>`up ${c} of ${n} yrs`, fell:(c,n)=>`down ${c} of ${n} yrs`,
     lvl:['no edge','low','medium','high'],
@@ -314,6 +361,7 @@ const L = {
     plan:'12-month plan', planH:'What historically rose and fell more often in each of the coming months. ↑16/20 means up 16 of 20 years. Bold: high repeatability. Tap a row to open that month.',
     colMonth:'Month', colL:'Rose more often', colS:'Fell more often', noneSteady:'none steady', curMonth:'current month',
     heat:'All instruments by month', heatH:'Top: average monthly move in %, bottom: how many of 20 years it rose (↑16/20) or fell (↓14/20). Hover a cell for the median and average gain and loss. Tap a month in the header or a cell to select it.',
+    swipe:'Swipe the table sideways →. Tap a cell for details.',
     lgUp:'mostly up', lgDn:'mostly down', lgBright:'brighter means it repeated more often', lgFlat:'grey: no edge or low repeatability', lgCf:'! average and most years point different ways',
     tAvg:'Average move', tMed:'Median', tWin:'Average gain', tLoss:'Average loss', tAbs:'Typical move',
     tCf:'A few big years pulled the average one way while most years went the other. No edge.',
@@ -336,6 +384,8 @@ let currentLang = 'ru';
 const today = new Date();
 const NOW_M = today.getMonth() + 1, NOW_Y = today.getFullYear();
 let SEL = NOW_M, GROUP = 'all', MODE = 'edge', DATA = null;
+const TOUCH = (() => { try { return window.matchMedia('(hover: none)').matches; } catch (e) { return false; } })();
+document.addEventListener('click', (e) => { if (TOUCH && !e.target.closest('.heat td')) document.querySelectorAll('.tip').forEach((x) => { x.hidden = true; }); });
 function store(k,v){ try{ localStorage.setItem(k,v) }catch(e){} }
 function load(k){ try{ return localStorage.getItem(k) }catch(e){ return null } }
 const T = () => L[currentLang];
@@ -379,7 +429,7 @@ function renderText(){
   const t = T();
   document.title = t.title + ' | Market Seasonality';
   document.getElementById('t-title').textContent = t.title;
-  [['t-longs','longs'],['t-longs-h','longsH'],['t-shorts','shorts'],['t-shorts-h','shortsH'],['t-active','active'],['t-active-h','activeH'],['t-cmp-h','cmpH'],['t-plan','plan'],['t-plan-h','planH'],['t-heat','heat'],['t-heat-h','heatH'],['t-method','method'],['t-foot','foot']].forEach(([id,k]) => { document.getElementById(id).textContent = t[k]; });
+  [['t-longs','longs'],['t-longs-h','longsH'],['t-shorts','shorts'],['t-shorts-h','shortsH'],['t-active','active'],['t-active-h','activeH'],['t-cmp-h','cmpH'],['t-plan','plan'],['t-plan-h','planH'],['t-heat','heat'],['t-heat-h','heatH'],['t-method','method'],['t-foot','foot'],['t-swipe','swipe']].forEach(([id,k]) => { document.getElementById(id).textContent = t[k]; });
   const lv = document.getElementById('levels'); lv.replaceChildren(el('span', null, t.levelsLine));
   t.lvDesc.forEach((d, i) => { const s = el('span'); s.append(lvBadge(3 - i, 1), ' ', d.split(':')[1].trim()); s.firstChild.style.marginLeft = '0'; lv.append(s); });
   const lg = document.getElementById('legend'); lg.replaceChildren();
@@ -409,6 +459,8 @@ function renderMonths(){
     b.onclick = () => selectMonth(i+1);
     nav.append(b);
   });
+  const a = nav.querySelector('.m-btn.active');
+  if (a && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = a.offsetLeft - nav.clientWidth / 2 + a.offsetWidth / 2;
 }
 
 function renderLede(){
@@ -416,9 +468,13 @@ function renderLede(){
   if (!DATA) { p.textContent = t.loading; return; }
   const l = longsFor(SEL)[0], s = shortsFor(SEL)[0];
   const mk = (i, cls) => { if (!i) return el('b', null, t.none); const a = an(st(i.id, SEL)); return el('b', cls, `${i.id} (${t.ofN(a.k, a.n)})`); };
-  const parts = t.lede(yearsN());
-  p.append(parts[0], el('b', null, t.mIn[SEL-1]), ' ' + parts[1].replace(/^ /, ''), mk(l, 'g'), parts[2], mk(s, 'r'), parts[3]);
-  if (currentLang === 'en') { p.replaceChildren(parts[0], el('b', null, t.mIn[SEL-1]), parts[1], mk(l, 'g'), parts[2], mk(s, 'r'), parts[3]); }
+  const n = yearsN(); let parts, items;
+  if (l && s) { parts = t.lede(n); items = [mk(l, 'g'), mk(s, 'r')]; }
+  else if (l) { parts = t.ledeNoDn(n); items = [mk(l, 'g')]; }
+  else if (s) { parts = t.ledeNoUp(n); items = [mk(s, 'r')]; }
+  else { parts = t.ledeNone(n); items = []; }
+  p.append(parts[0], el('b', null, t.mIn[SEL-1]), (currentLang === 'en' ? '' : ' ') + parts[1]);
+  items.forEach((x, i) => p.append(x, parts[i + 2]));
 }
 
 function item(i, m){
@@ -473,23 +529,23 @@ function renderCompare(){
   rows.forEach((i) => {
     const s = st(i.id, SEL), a = an(s), tr = body.insertRow();
     const ti = el('td','inst'); ti.append(el('b', null, i.id)); if (nameOf(i)) ti.append(el('span', null, nameOf(i))); tr.append(ti);
-    const tbias = el('td','nw');
+    const tbias = el('td','nw bcell');
     if (a.level) { const b = el('span','bias ' + (a.sign > 0 ? 'up' : 'dn'), (a.sign > 0 ? '↑ ' + t.biasUp : '↓ ' + t.biasDn)); tbias.append(b, lvBadge(a.level, a.sign)); }
     else { tbias.append(el('span','muted', '— ' + t.biasNone)); if (a.conflict) tbias.append(el('span','warn-txt', '! ' + t.conflict)); }
     tr.append(tbias);
-    const ty = el('td','nw'); ty.append(document.createTextNode(dirTxt(s)));
+    const ty = el('td','nw ycell'); ty.dataset.label = t.colYears; ty.append(document.createTextNode(dirTxt(s)));
     const bar = el('span','bar'); const fi = el('i'); fi.style.width = (a.k / a.n * 100) + '%'; fi.style.background = a.dir >= 0 ? 'var(--green)' : 'var(--red)'; bar.append(fi); ty.append(bar); tr.append(ty);
-    const tav = el('td','num'); tav.append(el('span', s.avg >= 0 ? 'up' : 'dn', fmt(s.avg) + '%'), el('span','match', fmt(s.med) + '%')); tr.append(tav);
-    const twl = el('td','num'); twl.append(el('span','up', s.avgUp != null ? fmt(s.avgUp) + '%' : '—'), el('span','muted', ' · '), el('span','dn', s.avgDn != null ? fmt(s.avgDn) + '%' : '—')); tr.append(twl);
+    const tav = el('td','num'); tav.dataset.label = t.colAvg; tav.append(el('span', s.avg >= 0 ? 'up' : 'dn', fmt(s.avg) + '%'), el('span','match', fmt(s.med) + '%')); tr.append(tav);
+    const twl = el('td','num'); twl.dataset.label = t.colWL; twl.append(el('span','up', s.avgUp != null ? fmt(s.avgUp) + '%' : '—'), el('span','muted', ' · '), el('span','dn', s.avgDn != null ? fmt(s.avgDn) + '%' : '—')); tr.append(twl);
     const act = DATA.actual[i.id] || {};
     const hm = (v) => (v == null || !a.level) ? '' : ((v > 0) === (a.sign > 0) ? '✓ ' + t.hit : '✗ ' + t.miss);
     const pv = act.prev ? act.prev[SEL-1] : null;
-    tr.append(valCell(pv, pv == null ? t.noData : hm(pv)));
+    const tpv = valCell(pv, pv == null ? t.noData : hm(pv)); tpv.dataset.label = String(DATA.prevYear); tr.append(tpv);
     let cv = act.cur ? act.cur[SEL-1] : null, note;
     if (DATA.curYear === NOW_Y && SEL > NOW_M) { cv = null; note = t.ahead; }
     else if (DATA.curYear === NOW_Y && SEL === NOW_M) note = t.inProgress;
     else note = cv == null ? t.noData : hm(cv);
-    tr.append(valCell(cv, note));
+    const tcv = valCell(cv, note); tcv.dataset.label = String(DATA.curYear); tr.append(tcv);
   });
 }
 
@@ -502,7 +558,7 @@ function renderPlan(){
     const m = ((NOW_M - 1 + k) % 12) + 1, y = NOW_Y + Math.floor((NOW_M - 1 + k) / 12);
     const tr = body.insertRow(); tr.className = 'pr' + (m === SEL ? ' sel' : '');
     const tm = el('td','mo', t.mFull[m-1] + ' ' + y); if (k === 0) tm.append(el('span', null, t.curMonth)); tr.append(tm);
-    const cell = (list, cls) => { const td = el('td'); if (!list.length) td.append(el('span','muted', t.noneSteady)); list.forEach((i) => { const s = st(i.id, m); td.append(el('span','tag ' + cls + ' t' + an(s).level, i.id + ' ' + dirShort(s))); }); return td; };
+    const cell = (list, cls) => { const td = el('td'); td.dataset.label = cls === 'l' ? t.colL : t.colS; if (!list.length) td.append(el('span','muted', t.noneSteady)); list.forEach((i) => { const s = st(i.id, m); td.append(el('span','tag ' + cls + ' t' + an(s).level, i.id + ' ' + dirShort(s))); }); return td; };
     tr.append(cell(longsFor(m), 'l'), cell(shortsFor(m), 's'));
     tr.onclick = () => { selectMonth(m); window.scrollTo({ top: 0, behavior: 'smooth' }); };
   }
@@ -521,7 +577,7 @@ function renderHeat(){
   });
   const body = tb.createTBody(); let lastG = null;
   avail().filter(inGroup).forEach((i) => {
-    if (i.group !== lastG) { const gr = body.insertRow(); gr.className = 'grp'; const gt = el('th', null, t.groups[i.group]); gt.colSpan = 13; gr.append(gt); lastG = i.group; }
+    if (i.group !== lastG) { const gr = body.insertRow(); gr.className = 'grp'; const gt = el('th'); gt.append(el('span','gl', t.groups[i.group])); gt.colSpan = 13; gr.append(gt); lastG = i.group; }
     const tr = body.insertRow(); const th = el('th','row', i.id); if (nameOf(i)) th.append(el('span', null, nameOf(i))); tr.append(th);
     DATA.stats[i.id].forEach((s, k) => {
       const td = el('td', k+1 === SEL ? 'sel' : '');
@@ -546,12 +602,19 @@ function renderHeat(){
         if (a.conflict) { lines.push(el('hr')); lines.push(el('div','warn-txt', '! ' + t.tCf)); }
         tip.replaceChildren(...lines); tip.hidden = false;
         const b = box.getBoundingClientRect(), c = td.getBoundingClientRect();
-        let left = c.right - b.left + box.scrollLeft + 6; if (c.right + 270 > window.innerWidth) left = c.left - b.left + box.scrollLeft - 266;
-        tip.style.left = Math.max(4, left) + 'px';
+        const tw = tip.offsetWidth || 230;
+        let left = c.right - b.left + box.scrollLeft + 6;
+        if (c.right + tw + 12 > window.innerWidth) left = c.left - b.left + box.scrollLeft - tw - 6;
+        const minL = box.scrollLeft + 4, maxL = box.scrollLeft + box.clientWidth - tw - 4;
+        tip.style.left = Math.max(minL, Math.min(left, maxL)) + 'px';
         let top = c.top - b.top + box.scrollTop; const maxTop = box.scrollHeight - tip.offsetHeight - 4; tip.style.top = Math.max(4, Math.min(top, maxTop)) + 'px';
       };
-      td.onmouseenter = show; td.onmouseleave = () => { tip.hidden = true; };
-      td.onclick = () => { selectMonth(k+1); };
+      td.dataset.key = i.id + '-' + k; td._show = show;
+      td.onmouseenter = () => { if (!TOUCH) show(); }; td.onmouseleave = () => { if (!TOUCH) tip.hidden = true; };
+      td.onclick = () => {
+        selectMonth(k+1);
+        if (TOUCH) { const nt = document.querySelector('.heat td[data-key="' + i.id + '-' + k + '"]'); if (nt && nt._show) nt._show(); }
+      };
       tr.append(td);
     });
   });
