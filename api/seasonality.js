@@ -44,36 +44,77 @@ function round(x, d = 2) {
   return Math.round(x * p) / p;
 }
 
-// Yahoo chart JSON (дневные свечи) -> { 'YYYY-MM': последнее закрытие месяца }
-// Месяц определяется по дате в часовом поясе биржи, поэтому переход на летнее время
-// и разные часовые пояса бирж не сдвигают месяцы.
-function monthlyCloses(json) {
+// Yahoo chart JSON (дневные свечи) -> закрытия по месяцам:
+//   m:   последнее закрытие месяца
+//   d10: последнее закрытие с 1 по 10 число
+//   d20: последнее закрытие с 1 по 20 число
+// Дата берётся в часовом поясе биржи, поэтому летнее время и пояса бирж ничего не сдвигают.
+function parseDaily(json) {
   const r = json && json.chart && json.chart.result && json.chart.result[0];
   if (!r || !r.timestamp) throw new Error('no data');
   const meta = r.meta || {};
   const tz = meta.gmtoffset || 0;
   let fmt = null;
   try {
-    if (meta.exchangeTimezoneName) fmt = new Intl.DateTimeFormat('en-CA', { timeZone: meta.exchangeTimezoneName, year: 'numeric', month: '2-digit' });
+    if (meta.exchangeTimezoneName) fmt = new Intl.DateTimeFormat('en-CA', { timeZone: meta.exchangeTimezoneName, year: 'numeric', month: '2-digit', day: '2-digit' });
   } catch (e) { fmt = null; }
   const adj = r.indicators.adjclose && r.indicators.adjclose[0] && r.indicators.adjclose[0].adjclose;
   const close = r.indicators.quote && r.indicators.quote[0] && r.indicators.quote[0].close;
   const vals = adj && adj.some((v) => v != null) ? adj : close;
-  const out = {};
+  const out = { m: {}, d10: {}, d20: {} };
   r.timestamp.forEach((t, i) => {
     const v = vals[i];
     if (v == null || !isFinite(v) || v <= 0) return;
-    let key;
+    let y, mo, d;
     if (fmt) {
       const p = fmt.formatToParts(new Date(t * 1000));
-      key = p.find((x) => x.type === 'year').value + '-' + p.find((x) => x.type === 'month').value;
+      y = p.find((x) => x.type === 'year').value; mo = p.find((x) => x.type === 'month').value; d = +p.find((x) => x.type === 'day').value;
     } else {
-      const d = new Date((t + tz + 43200) * 1000);
-      key = d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0');
+      const dt = new Date((t + tz + 43200) * 1000);
+      y = String(dt.getUTCFullYear()); mo = String(dt.getUTCMonth() + 1).padStart(2, '0'); d = dt.getUTCDate();
     }
-    out[key] = v; // свечи идут по порядку, остаётся последнее закрытие месяца
+    const key = y + '-' + mo;
+    out.m[key] = v; // свечи идут по порядку, остаётся последнее закрытие
+    if (d <= 10) out.d10[key] = v;
+    if (d <= 20) out.d20[key] = v;
   });
   return out;
+}
+function monthlyCloses(json) { return parseDaily(json).m; }
+
+function prevKey(y, m) { return m === 1 ? (y - 1) + '-12' : y + '-' + String(m - 1).padStart(2, '0'); }
+
+function summarize(v) {
+  if (!v.length) return null;
+  const s = v.slice().sort((a, b) => a - b);
+  const pos = v.filter((x) => x > 0), neg = v.filter((x) => x < 0);
+  const med = s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
+  return {
+    avg: round(v.reduce((a, b) => a + b, 0) / v.length),
+    med: round(med),
+    up: Math.round((100 * pos.length) / v.length),
+    abs: round(v.reduce((a, b) => a + Math.abs(b), 0) / v.length),
+    n: v.length,
+    avgUp: pos.length ? round(pos.reduce((a, b) => a + b, 0) / pos.length) : null,
+    avgDn: neg.length ? round(neg.reduce((a, b) => a + b, 0) / neg.length) : null,
+  };
+}
+
+// Части месяца: 1–10, 11–20, 21–конец. Для каждой: 12 месяцев × 3 части.
+function partsFor(p, y0, y1) {
+  const res = [];
+  for (let m = 1; m <= 12; m++) {
+    const v = [[], [], []];
+    for (let y = y0; y <= y1; y++) {
+      const k = y + '-' + String(m).padStart(2, '0'), pk = prevKey(y, m);
+      const c0 = p.m[pk], c10 = p.d10[k], c20 = p.d20[k], c30 = p.m[k];
+      if (c0 && c10) v[0].push(round((c10 / c0 - 1) * 100));
+      if (c10 && c20) v[1].push(round((c20 / c10 - 1) * 100));
+      if (c20 && c30) v[2].push(round((c30 / c20 - 1) * 100));
+    }
+    res.push(v.map((x) => { const r = summarize(x); if (r) { delete r.abs; } return r; }));
+  }
+  return res;
 }
 
 function monthReturn(closes, y, m) {
@@ -91,19 +132,7 @@ function statsFor(closes, y0, y1) {
       const r = monthReturn(closes, y, m);
       if (r != null) v.push(r);
     }
-    if (!v.length) { res.push(null); continue; }
-    const s = v.slice().sort((a, b) => a - b);
-    const pos = v.filter((x) => x > 0), neg = v.filter((x) => x < 0);
-    const med = s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
-    res.push({
-      avg: round(v.reduce((a, b) => a + b, 0) / v.length),
-      med: round(med),
-      up: Math.round((100 * v.filter((x) => x > 0).length) / v.length),
-      abs: round(v.reduce((a, b) => a + Math.abs(b), 0) / v.length),
-      n: v.length,
-      avgUp: pos.length ? round(pos.reduce((a, b) => a + b, 0) / pos.length) : null,
-      avgDn: neg.length ? round(neg.reduce((a, b) => a + b, 0) / neg.length) : null,
-    });
+    res.push(summarize(v));
   }
   return res;
 }
@@ -161,16 +190,18 @@ async function build() {
     curYear,
     stats: {},
     actual: {},
+    parts: {},
     method: {},
     failed: [],
   };
   const results = await pool(INSTRUMENTS, 6, async (ins) => {
     const json = await fetchYahoo(ins.yahoo, y0);
-    return monthlyCloses(json);
+    return parseDaily(json);
   });
   INSTRUMENTS.forEach((ins, k) => {
-    const closes = results[k];
-    const st = closes && !closes.error ? statsFor(closes, y0, y1) : null;
+    const pd = results[k];
+    const closes = pd && !pd.error ? pd.m : null;
+    const st = closes ? statsFor(closes, y0, y1) : null;
     // данные годятся, только если в каждом месяце есть хотя бы 15 лет из 20
     const good = st && st.every((m) => m && m.n >= 15);
     if (good) {
@@ -179,6 +210,8 @@ async function build() {
       for (let m = 1; m <= 12; m++) { prev.push(monthReturn(closes, y1, m)); cur.push(monthReturn(closes, curYear, m)); }
       out.actual[ins.id] = { prev, cur };
       out.method[ins.id] = 'close';
+      const pt = partsFor(pd, y0, y1);
+      if (pt.every((m) => m.every((x) => x && x.n >= 15))) out.parts[ins.id] = pt;
     } else if (fb && fb.stats[ins.id]) {
       out.stats[ins.id] = fb.stats[ins.id];
       out.actual[ins.id] = fb.actual[ins.id];
@@ -210,4 +243,4 @@ module.exports = async (req, res) => {
   }
 };
 
-module.exports._test = { monthlyCloses, statsFor, monthReturn, INSTRUMENTS, build };
+module.exports._test = { parseDaily, monthlyCloses, statsFor, partsFor, monthReturn, INSTRUMENTS, build };
