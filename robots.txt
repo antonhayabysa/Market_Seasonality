@@ -1,1 +1,5 @@
 
+User-agent: *
+Allow: /
+
+Sitemap: https://market-seasonality-iota.vercel.app/sitemap.xml
